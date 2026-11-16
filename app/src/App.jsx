@@ -7,7 +7,7 @@ import Unidad from './paginas/Unidad.jsx';
 import Expedientes from './paginas/Expedientes.jsx';
 import Expediente from './paginas/Expediente.jsx';
 import Instalar from './paginas/Instalar.jsx';
-import Prospectos from './paginas/Prospectos.jsx';
+import Pruebas from './paginas/Pruebas.jsx';
 
 function Entrar({ onListo }) {
   const [v, setV] = useState(import.meta.env.DEV ? 'dev-central' : '');
@@ -45,8 +45,8 @@ function Cabecera({ onSalir }) {
       <nav>
         <NavLink to="/" end>Monitor</NavLink>
         <NavLink to="/expedientes">Expedientes</NavLink>
+        <NavLink to="/pruebas">Pruebas</NavLink>
         <NavLink to="/instalar">Instalar</NavLink>
-        <NavLink to="/prospectos">Prospectos</NavLink>
         {permiso === 'default' && <button className="enlace" onClick={() => Notification.requestPermission().then(setPermiso)}>Activar avisos</button>}
         <button className="enlace" onClick={onSalir}>Salir</button>
       </nav>
@@ -69,7 +69,7 @@ export default function App() {
           <Route path="/expedientes" element={<Expedientes />} />
           <Route path="/expedientes/:id" element={<Expediente />} />
           <Route path="/instalar" element={<Instalar />} />
-          <Route path="/prospectos" element={<Prospectos />} />
+          <Route path="/pruebas" element={<Pruebas />} />
           <Route path="*" element={<p>No existe esta página.</p>} />
         </Routes>
       </main>

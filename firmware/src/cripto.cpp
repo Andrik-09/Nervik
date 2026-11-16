@@ -70,6 +70,12 @@ bool cripto::firmar(const uint8_t hash[32], uint8_t firma[64]) {
   return uECC_sign(privada, hash, 32, firma, curva);
 }
 
+bool cripto::autoprueba() {
+  uint8_t h[32], f[64];
+  for (auto &b : h) b = (uint8_t)rp2040.hwrand32();
+  return uECC_sign(privada, h, 32, f, curva) && uECC_verify(publica, h, 32, f, curva);
+}
+
 String cripto::llavePublicaPem() {
   // Encabezado DER de SubjectPublicKeyInfo para P-256 sin comprimir
   static const uint8_t prefijo[] = {0x30,0x59,0x30,0x13,0x06,0x07,0x2a,0x86,0x48,0xce,0x3d,0x02,0x01,0x06,0x08,0x2a,0x86,0x48,0xce,0x3d,0x03,0x01,0x07,0x03,0x42,0x00,0x04};

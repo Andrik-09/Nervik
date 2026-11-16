@@ -9,15 +9,15 @@ Dispositivo (RP2040 · Raspberry Pi Pico W en el prototipo)
 API (Node.js + Express)  ──►  Base de datos (SQLite en desarrollo → PostgreSQL/Supabase en piloto)
       │  REST + Server-Sent Events
       ▼
-App del centro de control (/app, PWA)        Página web B2B (/, con el prototipo en vivo)
-                                                   │ formulario → POST /api/v1/prospectos
+App de monitoreo (/app, PWA)                 Página web de promoción y venta (/)
+                                                   │ contacto → /api/v1/prospectos · carrito → /api/v1/pedidos
 ```
 
 **API.** Recibe telemetría y expedientes, verifica firma, contador y cadena de hashes, y empuja cambios en tiempo real a la app. Tiene un vigilante que marca una unidad como **muda** cuando deja de reportar con el motor encendido: es la señal que la central sí puede ver mientras el inhibidor bloquea la red. También calcula las zonas de riesgo (modelo v0: frecuencia de expedientes por celda de ~5 km, ponderada por antigüedad).
 
-**App.** Una sola pantalla principal que responde «¿alguna unidad está siendo atacada ahora?», con la misma estructura en estado normal y en alerta (como en los wireframes de la semana 6). Incluye detalle de unidad con la huella de señal, expedientes con verificación de firma en el navegador (WebCrypto), flujo de instalación con autoprueba y la lista de prospectos que llegan de la web. Es una PWA: se instala en el celular desde el navegador sin pasar por las tiendas.
+**App.** Una sola pantalla principal que responde «¿alguna unidad está siendo atacada ahora?», con la misma estructura en estado normal y en alerta (como en los wireframes de la semana 6). Incluye detalle de unidad con la huella de señal, expedientes con verificación de firma en el navegador (WebCrypto), flujo de instalación en 3 pasos y la sección de pruebas, que manda órdenes de diagnóstico al equipo y muestra su respuesta firmada. Es una PWA: se instala en el celular desde el navegador sin pasar por las tiendas.
 
-**Web.** La landing de la semana 8, ahora con sección para aseguradoras, preguntas frecuentes y el formulario conectado a la API.
+**Web.** Página de promoción y venta: qué es Nervik, cómo funciona, la app, planes, aseguradoras, preguntas, bitácora del proyecto, canales y formulario de contacto, y tienda con carrito. El servidor calcula precios e IVA de cada pedido (no confía en el navegador) y le asigna un folio; el cobro se hace después con liga de pago o transferencia. El equipo ve pedidos y mensajes en `/admin`.
 
 **Firmware del prototipo.** Raspberry Pi Pico W (el RP2040 del PDS) con receptor GNSS, interfaz de 3 LED y 2 botones, y opcionalmente MCP2515, LSM6DSOX y SIM7080G. Mide el C/N0 de cada satélite, corre la máquina de estados N0–N3, firma los mensajes, los guarda si no hay red y los envía en orden. Incluye un simulacro para demostrar la cadena completa sin inhibidor. Ver `prototipo.md`.
 
@@ -39,4 +39,5 @@ App del centro de control (/app, PWA)        Página web B2B (/, con el prototip
 4. **Recálculo de rutas.** Integrar OSRM o Valhalla y evitar los polígonos de las zonas de riesgo con mayor puntaje en el horario de salida.
 5. **Modelo de riesgo v1.** Con los expedientes reales del piloto, entrenar un modelo que use tramo, hora, día y tipo de carga en lugar de solo frecuencia.
 6. **Firmware.** Probar el prototipo con el SIM7080G, un bus J1939 real y la IMU; reemplazar la regla v0 por el modelo TinyML entrenado con los CSV de manejo.
-7. **Despliegue.** API en Railway, Render o Fly.io; app en Vercel o Netlify; web en GitHub Pages. Cambiar `web/config.js` a la URL pública de la API.
+7. **Cobro en línea.** Conectar Mercado Pago (Checkout Pro) o Stripe al pedido para cobrar con tarjeta desde la página, y facturación electrónica.
+8. **Despliegue.** API en Railway, Render o Fly.io; app en Vercel o Netlify; web en GitHub Pages. Cambiar `web/config.js` a la URL pública de la API.

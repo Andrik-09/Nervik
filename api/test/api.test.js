@@ -98,3 +98,31 @@ test('alta con el código del firmware (NVK1:serie:llave) y demo pública', asyn
   const csv = await fetch(base + '/api/v1/unidades/NVK-P001/telemetria.csv', { headers: H }).then(x => x.text());
   assert.match(csv, /^ts,recibido,lat/);
 });
+
+test('tienda: el servidor calcula el pedido con los precios acordados', async () => {
+  const cat = await fetch(base + '/api/v1/catalogo').then(r => r.json());
+  assert.equal(cat.dispositivo.precio, 1800);
+  assert.equal(cat.plan.precio, 300);
+  const r = await post('/api/v1/pedidos', { unidades: 3, nombre: 'Ana', empresa: 'Fletes X', correo: 'ana@fletes.mx', telefono: '2220000000', metodo_pago: 'tarjeta', total_hoy: 1 }, { 'content-type': 'application/json' });
+  const p = await r.json();
+  assert.equal(r.status, 201);
+  assert.match(p.folio, /^NVK-\d{4}-0001$/);
+  assert.equal(p.subtotal_hoy, 3 * 1800 + 3 * 300);   // ignora el total que mande el navegador
+  assert.equal(p.total_hoy, 7308);                     // 6,300 + IVA 16%
+  assert.equal(p.mensual, 1044);                       // 900 + IVA
+  const mal = await post('/api/v1/pedidos', { unidades: 0, nombre: 'x', empresa: 'y', correo: 'z@z.mx', telefono: '1' }, { 'content-type': 'application/json' });
+  assert.equal(mal.status, 400);
+  assert.equal((await get('/api/v1/pedidos'))[0].estado, 'pendiente_pago');
+});
+
+test('pruebas remotas: la app pide diagnóstico y el equipo responde firmado', async () => {
+  const c = await (await post('/api/v1/unidades/NVK-0001/comandos', { tipo: 'diagnostico' })).json();
+  assert.equal(c.estado, 'pendiente');
+  const r = await (await post('/api/v1/dispositivo/mensajes', eq.sobre('telemetria', { lat: 19, lon: -98, vel: 0, motor: 1 }))).json();
+  assert.deepEqual(r.comandos, [{ id: c.id, tipo: 'diagnostico' }]);  // viaja en la respuesta
+  const r2 = await (await post('/api/v1/dispositivo/mensajes', eq.sobre('diagnostico', { comando_id: c.id, ok: true, pruebas: [{ prueba: 'gnss', ok: true, valor: '9 sat' }] }))).json();
+  assert.equal(r2.ok, true);
+  const lista = await get('/api/v1/unidades/NVK-0001/comandos');
+  assert.equal(lista[0].estado, 'completado');
+  assert.equal(lista[0].resultado.pruebas[0].valor, '9 sat');
+});

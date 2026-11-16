@@ -13,6 +13,14 @@ const LLAVE_CENTRAL = process.env.CENTRAL_API_KEY || 'dev-central';
 // Segundos sin reporte (con motor encendido) para marcar una unidad como "muda".
 const UMBRAL_MUDA_S = Number(process.env.UMBRAL_MUDA_S || 45);
 const NIVELES = ['Normal', 'Anomalía', 'Sospecha', 'Evento confirmado'];
+// Precios acordados en la semana 7 (MXN, sin IVA). Un solo lugar para la web, el carrito y los pedidos.
+const CATALOGO = {
+  dispositivo: { nombre: 'Dispositivo Nervik', descripcion: 'Equipo instalado en la unidad, con cable para conector de 9 pines y batería de respaldo de 72 horas', precio: Number(process.env.PRECIO_DISPOSITIVO || 1800), cobro: 'unico' },
+  plan: { nombre: 'Plan mensual Nervik', descripcion: 'App de monitoreo, conectividad celular, expedientes firmados, pruebas remotas y reporte para tu aseguradora', precio: Number(process.env.PRECIO_PLAN || 300), cobro: 'mensual' },
+  iva: 0.16,
+  moneda: 'MXN',
+};
+const redondeo = x => Math.round(x * 100) / 100;
 
 if (LLAVE_CENTRAL === 'dev-central') {
   console.warn('[aviso] CENTRAL_API_KEY no definida; usando la llave de desarrollo "dev-central".');
@@ -21,6 +29,7 @@ if (LLAVE_CENTRAL === 'dev-central') {
 const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '256kb' }));
+app.use(express.urlencoded({ extended: false }));
 
 // ---------- utilidades ----------
 const q = {
@@ -44,6 +53,16 @@ const q = {
   telTodo: db.prepare('SELECT * FROM telemetria WHERE dispositivo_id = ? ORDER BY id'),
   insProspecto: db.prepare('INSERT INTO prospectos (nombre, empresa, unidades, corredor, telefono, correo, tipo, origen) VALUES (?,?,?,?,?,?,?,?)'),
   prospectos: db.prepare('SELECT * FROM prospectos ORDER BY id DESC LIMIT 500'),
+  insPedido: db.prepare(`INSERT INTO pedidos (nombre, empresa, rfc, correo, telefono, estado_mx, direccion, corredor, unidades, metodo_pago, subtotal_hoy, iva_hoy, total_hoy, mensual, notas)
+                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`),
+  pedidos: db.prepare('SELECT * FROM pedidos ORDER BY id DESC LIMIT 500'),
+  insComando: db.prepare('INSERT INTO comandos (dispositivo_id, tipo) VALUES (?, ?)'),
+  pendientes: db.prepare("SELECT id, tipo FROM comandos WHERE dispositivo_id = ? AND estado = 'pendiente' ORDER BY id"),
+  entregar: db.prepare("UPDATE comandos SET estado = 'entregado', entregado = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?"),
+  completar: db.prepare("UPDATE comandos SET estado = 'completado', completado = strftime('%Y-%m-%dT%H:%M:%fZ','now'), resultado = ? WHERE id = ? AND dispositivo_id = ?"),
+  insComandoHecho: db.prepare("INSERT INTO comandos (dispositivo_id, tipo, estado, resultado, entregado, completado) VALUES (?, 'diagnostico', 'completado', ?, strftime('%Y-%m-%dT%H:%M:%fZ','now'), strftime('%Y-%m-%dT%H:%M:%fZ','now'))"),
+  comandosDisp: db.prepare('SELECT * FROM comandos WHERE dispositivo_id = ? ORDER BY id DESC LIMIT 20'),
+  comando: db.prepare('SELECT * FROM comandos WHERE id = ?'),
 };
 
 function soloCentral(req, res, next) {
@@ -92,6 +111,19 @@ function resumenUnidad(d) {
   };
 }
 
+// Órdenes pendientes para el equipo: viajan en la respuesta a cualquier mensaje que mande,
+// así funciona aunque el equipo esté detrás de una red celular sin IP pública.
+function entregarComandos(dispId) {
+  const lista = q.pendientes.all(dispId);
+  for (const c of lista) q.entregar.run(c.id);
+  if (lista.length) emitir('comando', { dispositivo_id: dispId, ids: lista.map(c => c.id), estado: 'entregado' });
+  return lista;
+}
+
+function comandoPublico(c) {
+  return c && { id: c.id, tipo: c.tipo, estado: c.estado, creado: c.creado, entregado: c.entregado, completado: c.completado, resultado: c.resultado ? JSON.parse(c.resultado) : null };
+}
+
 // ---------- tiempo real (Server-Sent Events) ----------
 const clientes = new Set();
 function emitir(tipo, datos) {
@@ -129,10 +161,12 @@ app.options('/api/v1/prospectos', cors());
 app.post('/api/v1/prospectos', cors(), (req, res) => {
   const b = req.body || {};
   if (texto(b.sitio_web)) return res.status(201).json({ ok: true }); // campo trampa anti-bots
-  const nombre = texto(b.nombre), empresa = texto(b.empresa), telefono = texto(b.telefono, 30);
-  if (!nombre || !empresa || !telefono) return res.status(400).json({ error: 'Faltan nombre, empresa o teléfono' });
+  const nombre = texto(b.nombre), empresa = texto(b.empresa), telefonoDado = texto(b.telefono, 30), telefono = telefonoDado || '—';
+  if (!nombre || !empresa || (!telefonoDado && !texto(b.correo))) return res.status(400).json({ error: 'Faltan nombre, empresa y un teléfono o correo' });
   const tipo = ['flota', 'aseguradora', 'broker'].includes(b.tipo) ? b.tipo : 'flota';
   const r = q.insProspecto.run(nombre, empresa, texto(b.unidades, 30), texto(b.corredor), telefono, texto(b.correo), tipo, texto(b.origen, 60) || 'web');
+  const extra = { motivo: texto(b.motivo, 40) || null, mensaje: texto(b.mensaje, 1500) || null };
+  db.prepare('UPDATE prospectos SET motivo = ?, mensaje = ? WHERE id = ?').run(extra.motivo, extra.mensaje, r.lastInsertRowid);
   emitir('prospecto', { id: Number(r.lastInsertRowid), nombre, empresa, tipo });
   res.status(201).json({ ok: true, id: Number(r.lastInsertRowid) });
 });
@@ -160,7 +194,7 @@ app.post('/api/v1/dispositivo/mensajes', (req, res) => {
     const r = resumenUnidad(disp);
     ultimoEstado.set(disp.id, r.estado);
     emitir('unidad', r);
-    return res.status(202).json({ ok: true, hora: new Date().toISOString() });
+    return res.status(202).json({ ok: true, hora: new Date().toISOString(), comandos: entregarComandos(disp.id) });
   }
 
   if (d.tipo === 'evento') {
@@ -179,7 +213,22 @@ app.post('/api/v1/dispositivo/mensajes', (req, res) => {
       return res.status(409).json({ error: 'Expediente duplicado', detalle: err.message });
     }
     emitir('evento', { id, dispositivo_id: disp.id, unidad: disp.unidad, inicio: d.inicio, nivel_max: d.nivel_max, cadena_integra: integra, simulacro: !!d.simulacro });
-    return res.status(201).json({ ok: true, id, hash: v.hash, cadena_integra: !!integra, hora: new Date().toISOString() });
+    return res.status(201).json({ ok: true, id, hash: v.hash, cadena_integra: !!integra, hora: new Date().toISOString(), comandos: entregarComandos(disp.id) });
+  }
+
+  if (d.tipo === 'diagnostico') {
+    const resultado = JSON.stringify({
+      ok: !!d.ok, ts: texto(d.ts, 40) || null, firmware: texto(d.firmware, 20) || null, simulacro: !!d.simulacro,
+      pruebas: Array.isArray(d.pruebas) ? d.pruebas.slice(0, 30).map(p => ({ prueba: texto(p.prueba, 40), ok: p.ok === null ? null : !!p.ok, valor: texto(String(p.valor ?? ''), 60), detalle: texto(p.detalle || '', 160) })) : [],
+      firma_valida: true,
+    });
+    let id = Number(d.comando_id);
+    const r = id ? q.completar.run(resultado, id, disp.id) : { changes: 0 };
+    if (!r.changes) id = Number(q.insComandoHecho.run(disp.id, resultado).lastInsertRowid); // diagnóstico pedido con el botón del equipo
+    q.actContador.run(d.contador, disp.id);
+    const c = comandoPublico(q.comando.get(id));
+    emitir('diagnostico', { dispositivo_id: disp.id, unidad: disp.unidad, comando: c });
+    return res.status(201).json({ ok: true, hora: new Date().toISOString(), comandos: entregarComandos(disp.id) });
   }
 
   res.status(400).json({ error: 'tipo desconocido' });
@@ -218,6 +267,7 @@ app.get('/api/v1/unidades/:id', soloCentral, (req, res) => {
     creado: d.creado,
     telemetria: q.telRecientes.all(d.id, 120).reverse(),
     eventos: q.eventosDisp.all(d.id, 50),
+    comandos: q.comandosDisp.all(d.id).map(comandoPublico),
   });
 });
 
@@ -246,6 +296,60 @@ app.get('/api/v1/riesgo/zonas', soloCentral, (_req, res) => {
 });
 
 app.get('/api/v1/prospectos', soloCentral, (_req, res) => res.json(q.prospectos.all()));
+
+// ---------- pruebas remotas ----------
+app.post('/api/v1/unidades/:id/comandos', soloCentral, (req, res) => {
+  const d = q.disp.get(req.params.id);
+  if (!d) return res.status(404).json({ error: 'No existe' });
+  const tipo = req.body?.tipo;
+  if (!['diagnostico', 'simulacro'].includes(tipo)) return res.status(400).json({ error: 'tipo debe ser diagnostico o simulacro' });
+  const r = q.insComando.run(d.id, tipo);
+  const c = comandoPublico(q.comando.get(Number(r.lastInsertRowid)));
+  emitir('comando', { dispositivo_id: d.id, ids: [c.id], estado: 'pendiente' });
+  res.status(201).json(c);
+});
+app.get('/api/v1/unidades/:id/comandos', soloCentral, (req, res) => res.json(q.comandosDisp.all(req.params.id).map(comandoPublico)));
+
+// ---------- tienda ----------
+app.get('/api/v1/catalogo', cors(), (_req, res) => res.json(CATALOGO));
+
+function cotizar(unidades) {
+  const dispositivos = unidades * CATALOGO.dispositivo.precio;
+  const primerMes = unidades * CATALOGO.plan.precio;
+  const subtotal = dispositivos + primerMes;
+  const iva = redondeo(subtotal * CATALOGO.iva);
+  return { unidades, dispositivos, primer_mes: primerMes, subtotal_hoy: subtotal, iva_hoy: iva, total_hoy: redondeo(subtotal + iva), mensual: redondeo(primerMes * (1 + CATALOGO.iva)) };
+}
+
+app.options('/api/v1/pedidos', cors());
+app.post('/api/v1/pedidos', cors(), (req, res) => {
+  const b = req.body || {};
+  if (texto(b.sitio_web)) return res.status(201).json({ ok: true });
+  const unidades = Math.floor(Number(b.unidades));
+  if (!Number.isFinite(unidades) || unidades < 1 || unidades > 500) return res.status(400).json({ error: 'El número de unidades debe estar entre 1 y 500' });
+  const campos = { nombre: texto(b.nombre), empresa: texto(b.empresa), correo: texto(b.correo), telefono: texto(b.telefono, 30) };
+  const falta = Object.entries(campos).filter(([, v]) => !v).map(([k]) => k);
+  if (falta.length) return res.status(400).json({ error: `Faltan datos: ${falta.join(', ')}` });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(campos.correo)) return res.status(400).json({ error: 'El correo no parece válido' });
+  const metodo = ['tarjeta', 'transferencia', 'mercadopago'].includes(b.metodo_pago) ? b.metodo_pago : 'transferencia';
+  const c = cotizar(unidades);
+  const r = q.insPedido.run(campos.nombre, campos.empresa, texto(b.rfc, 13).toUpperCase() || null, campos.correo, campos.telefono,
+    texto(b.estado_mx, 40) || null, texto(b.direccion, 200) || null, texto(b.corredor) || null, unidades, metodo,
+    c.subtotal_hoy, c.iva_hoy, c.total_hoy, c.mensual, texto(b.notas, 500) || null);
+  const id = Number(r.lastInsertRowid);
+  const folio = `NVK-${new Date().getFullYear()}-${String(id).padStart(4, '0')}`;
+  db.prepare('UPDATE pedidos SET folio = ? WHERE id = ?').run(folio, id);
+  emitir('pedido', { id, folio, empresa: campos.empresa, unidades });
+  res.status(201).json({ ok: true, folio, metodo_pago: metodo, ...c });
+});
+app.get('/api/v1/pedidos', soloCentral, (_req, res) => res.json(q.pedidos.all()));
+app.patch('/api/v1/pedidos/:id', soloCentral, (req, res) => {
+  const estado = req.body?.estado;
+  if (!['pendiente_pago', 'pagado', 'instalado', 'cancelado'].includes(estado)) return res.status(400).json({ error: 'Estado inválido' });
+  const r = db.prepare('UPDATE pedidos SET estado = ? WHERE id = ?').run(estado, Number(req.params.id));
+  if (!r.changes) return res.status(404).json({ error: 'No existe' });
+  res.json({ ok: true });
+});
 
 // Datos crudos de una unidad para analizar falsas alarmas (requisito F-02) y entrenar el modelo TinyML
 app.get('/api/v1/unidades/:id/telemetria.csv', soloCentral, (req, res) => {

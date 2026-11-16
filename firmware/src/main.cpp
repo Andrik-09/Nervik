@@ -78,6 +78,7 @@ static double ultLat = 0, ultLon = 0;
 static bool hayPosicion = false;
 static uint32_t msUltimoEnvioOk = 0;
 static String ultimoError;
+static int32_t diagnosticoPendiente = -1;   // id del comando de diagnóstico que pidió la app (0 = botón)
 
 // Firma el payload y lo envía; si no hay red o hay cola, lo guarda para enviarlo después en orden.
 static void enviar(JsonDocument &doc, bool esEvento) {
@@ -114,7 +115,16 @@ static void vaciarCola() {
       msUltimoEnvioOk = millis();
       ultimoError = "";
       JsonDocument r;
-      if (!deserializeJson(r, resp) && r["hora"].is<const char *>() && !gnss::estado().hora_valida) sincronizarIso(r["hora"]);
+      if (!deserializeJson(r, resp)) {
+        if (r["hora"].is<const char *>() && !gnss::estado().hora_valida) sincronizarIso(r["hora"]);
+        // Órdenes de la app: viajan en la respuesta. Solo actúan sobre el equipo, nunca sobre el vehículo.
+        for (JsonObject cmd : r["comandos"].as<JsonArray>()) {
+          const char *tipo = cmd["tipo"] | "";
+          Serial.printf("[comando] %s (#%ld)\n", tipo, (long)(cmd["id"] | 0));
+          if (!strcmp(tipo, "diagnostico")) diagnosticoPendiente = cmd["id"] | 0;
+          else if (!strcmp(tipo, "simulacro") && !simulacro) iniciarSimulacro();
+        }
+      }
     } else if (codigo == 401 || codigo == 400) {
       almacen::quitarDeCola(c);           // rechazado por firma o formato: reintentar no sirve
       ultimoError = "rechazado " + String(codigo) + ": " + resp;
@@ -206,6 +216,51 @@ static void enviarExpediente() {
   Serial.printf("[evento] expediente firmado (N%d, %d hitos) en cola\n", deteccion::nivelMaximo(), n);
 }
 
+// ---------------- diagnóstico (pruebas desde la app o con el botón) ----------------
+static void prueba(JsonArray a, const char *nombre, int ok, const String &valor, const char *detalle = "") {
+  JsonObject p = a.add<JsonObject>();
+  p["prueba"] = nombre;
+  if (ok < 0) p["ok"] = nullptr; else p["ok"] = ok == 1;   // null = módulo no instalado
+  p["valor"] = valor;
+  if (*detalle) p["detalle"] = detalle;
+}
+
+static void ejecutarDiagnostico(int32_t comandoId) {
+  Serial.println(F("[diagnostico] ejecutando…"));
+  interfaz::destello();
+  const EstadoGnss &g = gnss::estado();
+  FSInfo fs; bool fsOk = LittleFS.info(fs);
+  bool firmaOk = cripto::autoprueba();
+  JsonDocument doc;
+  doc["tipo"] = "diagnostico";
+  if (comandoId > 0) doc["comando_id"] = comandoId;
+  JsonArray a = doc["pruebas"].to<JsonArray>();
+  prueba(a, "receptor_gnss", gnss::hayDatos(), gnss::hayDatos() ? "recibe tramas NMEA" : "sin tramas", "Revisar TX/RX y alimentación del módulo");
+  prueba(a, "posicion_gnss", g.fix && g.sats_con_senal >= 4, String(g.sats_con_senal) + " sat, C/N0 " + String(g.cn0_prom, 1) + " dB-Hz", "La antena necesita ver el cielo");
+  prueba(a, "red", enlace::conectado(), String(enlace::nombre()) + (enlace::conectado() ? " " + String((int)enlace::rssi()) + " dBm" : " sin conexión"));
+#if USAR_CAN
+  prueba(a, "bus_j1939", vehiculo::hayBus(), vehiculo::hayBus() ? "recibe tramas (solo escucha)" : "sin tramas", "Revisar CAN_H/CAN_L y el cable de 9 pines");
+#else
+  prueba(a, "bus_j1939", -1, "no instalado");
+#endif
+#if USAR_IMU
+  prueba(a, "imu", vehiculo::hayImu(), vehiculo::hayImu() ? "LSM6DSOX responde" : "no responde");
+#else
+  prueba(a, "imu", -1, "no instalado");
+#endif
+  float v = vehiculo::alimentacion(), b = vehiculo::bateria();
+  prueba(a, "alimentacion", isnan(v) ? -1 : v >= 11, isnan(v) ? String("no medido") : String(v, 1) + " V");
+  prueba(a, "bateria", isnan(b) ? -1 : b >= 20, isnan(b) ? String("no medido") : String((int)b) + " %");
+  prueba(a, "memoria", fsOk && almacen::tamanoCola() < 500, fsOk ? String((unsigned)(fs.usedBytes / 1024)) + " de " + String((unsigned)(fs.totalBytes / 1024)) + " kB, " + String(almacen::tamanoCola()) + " en cola" : "sin sistema de archivos");
+  prueba(a, "firma", firmaOk, firmaOk ? "ECDSA P-256 correcta" : "falla al firmar");
+  prueba(a, "reloj", horaValida(), horaValida() ? isoAhora() : "sin sincronizar");
+  prueba(a, "luces_y_buzzer", 1, "destello realizado", "Confirmar a simple vista que encendieron los 3 LED y sonó el buzzer");
+  prueba(a, "deteccion", 1, "nivel N" + String(deteccion::nivel()) + ", base C/N0 " + String(deteccion::lineaBaseCn0(), 1) + " dB-Hz");
+  doc["ok"] = gnss::hayDatos() && enlace::conectado() && fsOk && firmaOk;
+  doc["firmware"] = VERSION_FIRMWARE;
+  enviar(doc, false);
+}
+
 // ---------------- monitor serie ----------------
 static void imprimirAlta() {
   Serial.println(F("\n==================== ALTA EN LA APP ===================="));
@@ -236,9 +291,10 @@ static void comandos() {
     if (cmd == "alta") imprimirAlta();
     else if (cmd == "estado") imprimirEstado();
     else if (cmd == "simulacro") simulacro ? terminarSimulacro() : iniciarSimulacro();
+    else if (cmd == "diagnostico") diagnosticoPendiente = 0;
     else if (cmd == "vaciar-cola") { almacen::vaciarCola(); Serial.println(F("cola vacía")); }
     else if (cmd == "nueva-llave SI") { cripto::regenerar(); almacen::guardarHashPrevio(""); imprimirAlta(); Serial.println(F("Llave nueva: da de alta el equipo otra vez.")); }
-    else if (cmd.length()) Serial.println(F("Comandos: alta · estado · simulacro · vaciar-cola · nueva-llave SI"));
+    else if (cmd.length()) Serial.println(F("Comandos: alta · estado · diagnostico · simulacro · vaciar-cola · nueva-llave SI"));
     cmd = "";
   }
 }
@@ -267,7 +323,7 @@ void loop() {
   comandos();
 
   switch (interfaz::boton()) {
-    case interfaz::CORTO: interfaz::destello(); imprimirEstado(); enviarTelemetria(entradasActuales()); break;
+    case interfaz::CORTO: imprimirEstado(); diagnosticoPendiente = 0; break;   // autoprueba local, el resultado también llega a la app
     case interfaz::LARGO: simulacro ? terminarSimulacro() : iniciarSimulacro(); break;
     default: break;
   }
@@ -295,6 +351,7 @@ void loop() {
     if (millis() - msTelemetria >= PERIODO_TELEMETRIA_S * 1000UL) { msTelemetria = millis(); enviarTelemetria(e); }
   }
 
+  if (diagnosticoPendiente >= 0) { int32_t id = diagnosticoPendiente; diagnosticoPendiente = -1; ejecutarDiagnostico(id); }
   vaciarCola();
   bool comOk = enlace::conectado() && almacen::tamanoCola() == 0 && millis() - msUltimoEnvioOk < PERIODO_TELEMETRIA_S * 2500UL;
   interfaz::actualizar(deteccion::nivel(), comOk, simulacro);

@@ -3,7 +3,7 @@
 //  Comunicación fija = último envío correcto · parpadea = sin red o con mensajes en cola
 //  Alerta       apagada N0 · lenta N1 · rápida N2 · fija N3
 //  Buzzer       avisos cortos en N2, patrón insistente en N3 (alerta en cabina)
-//  Botón        pulsación corta = autoprueba y reporte inmediato · 3 s = iniciar/terminar simulacro
+//  Botón        pulsación corta = diagnóstico (también llega a la app) · 3 s = iniciar/terminar simulacro
 #pragma once
 #include <Arduino.h>
 

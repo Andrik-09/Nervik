@@ -133,3 +133,20 @@ dd { margin: 0; font-weight: 700; }
 .camara video { width: 100%; max-width: 420px; border: 2px solid var(--k); border-radius: 6px; }
 .ilustracion { border: 2px solid var(--k); border-radius: 6px; padding: 10px; }
 .acciones { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+
+/* pruebas y diagnóstico */
+.diag-cab { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.diag-cab h2 { margin-top: 0; }
+.diagnostico { border: 2px solid var(--k); border-radius: 6px; padding: 14px 16px; margin: 18px 0; }
+.diagnostico .pruebas li { align-items: baseline; }
+.p-nombre small { display: block; color: var(--g); font-weight: 400; font-size: 12px; }
+.pruebas-col { grid-template-columns: 340px 1fr; }
+.tarjeta-boton { all: unset; display: block; width: 100%; padding: 10px 12px; cursor: pointer; box-sizing: border-box; }
+.tarjeta-boton:focus-visible { outline: 3px solid var(--g2); outline-offset: -3px; }
+.tarjeta-sel { background: var(--k); color: var(--w); }
+.tarjeta-sel .tarjeta-det { color: #ccc; }
+.vacio-sel { border: 2px dashed var(--g2); border-radius: 6px; padding: 24px; color: var(--g); }
+.btn:disabled { opacity: .55; cursor: default; }
+@media (max-width: 860px) { .pruebas-col { grid-template-columns: 1fr; } }
+
+.pruebas li .p-nombre { margin-left: 0; flex: 1; font-size: 15px; color: inherit; }

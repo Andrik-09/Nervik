@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carrito | Nervik</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#000000">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="stylesheet" href="estilos.css">
+<link rel="stylesheet" href="carrito.css">
+</head>
+<body>
+<header class="cabecera">
+  <div class="marco cabecera-fila">
+    <a class="marca" href="index.html">NERVIK</a>
+    <button class="abrir-menu" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
+    <nav class="menu" id="menu" aria-label="Secciones">
+      <a href="index.html#como-funciona">Cómo funciona</a>
+      <a href="index.html#planes">Planes</a>
+      <a href="index.html#contacto">Contacto</a>
+    </nav>
+    <div class="cabecera-acciones">
+      <a class="boton-carrito" href="carrito.html" aria-current="page">Carrito <span class="contador" data-contador-carrito hidden></span></a>
+    </div>
+  </div>
+</header>
+
+<main class="marco tienda" id="contenido">
+  <h1 class="titulo-tienda" id="titulo">Tu carrito</h1>
+
+  <section id="vacio" class="vacio" hidden>
+    <p>Tu carrito está vacío. Elige cuántas unidades quieres proteger y agrega el dispositivo con su plan mensual.</p>
+    <a class="boton" href="index.html#planes">Ver planes y precios</a>
+  </section>
+
+  <div id="compra" class="compra" hidden>
+    <section class="renglones" aria-labelledby="titulo">
+      <article class="renglon">
+        <div>
+          <h2 class="producto">Dispositivo Nervik</h2>
+          <p class="detalle">Equipo instalado, con cable para conector de 9 pines y batería de respaldo de 72 horas. Pago único por unidad.</p>
+        </div>
+        <div class="cantidad">
+          <label for="cant">Unidades</label>
+          <div class="paso-numero paso-claro">
+            <button type="button" data-cambio="-1" aria-label="Una unidad menos">−</button>
+            <input id="cant" type="number" inputmode="numeric" min="1" max="500">
+            <button type="button" data-cambio="1" aria-label="Una unidad más">+</button>
+          </div>
+        </div>
+        <p class="importe" id="imp-disp"></p>
+      </article>
+      <article class="renglon">
+        <div>
+          <h2 class="producto">Plan mensual Nervik</h2>
+          <p class="detalle">Uno por cada dispositivo: app de monitoreo, conectividad celular, expedientes firmados y pruebas a distancia. Hoy pagas el primer mes.</p>
+        </div>
+        <p class="cantidad-fija" id="cant-plan"></p>
+        <p class="importe" id="imp-plan"></p>
+      </article>
+      <button class="quitar" id="vaciar" type="button">Vaciar carrito</button>
+    </section>
+
+    <aside class="resumen" aria-label="Resumen del pedido">
+      <dl>
+        <dt>Subtotal</dt><dd id="r-sub"></dd>
+        <dt>IVA (16%)</dt><dd id="r-iva"></dd>
+        <dt class="total">Pagas hoy</dt><dd class="total" id="r-total"></dd>
+        <dt>Después, cada mes</dt><dd id="r-mes"></dd>
+      </dl>
+      <p class="nota-iva">El plan se cobra mes a mes por cada unidad, a partir del segundo mes.</p>
+    </aside>
+
+    <form id="pedido" class="datos-pedido" novalidate>
+      <h2 class="subtitulo-tienda">Datos para tu pedido</h2>
+      <div class="campos">
+        <div class="par">
+          <div><label for="p-nombre">Nombre de quien compra</label><input id="p-nombre" name="nombre" autocomplete="name" required></div>
+          <div><label for="p-empresa">Empresa</label><input id="p-empresa" name="empresa" autocomplete="organization" required></div>
+        </div>
+        <div class="par">
+          <div><label for="p-correo">Correo</label><input id="p-correo" name="correo" type="email" autocomplete="email" required></div>
+          <div><label for="p-telefono">Teléfono</label><input id="p-telefono" name="telefono" type="tel" autocomplete="tel" required></div>
+        </div>
+        <div class="par">
+          <div><label for="p-rfc">RFC para factura (opcional)</label><input id="p-rfc" name="rfc" maxlength="13" autocapitalize="characters"></div>
+          <div><label for="p-estado">Estado donde se instala</label>
+            <select id="p-estado" name="estado_mx">
+              <option>Puebla</option><option>Ciudad de México</option><option>Estado de México</option><option>Veracruz</option><option>Tlaxcala</option><option>Querétaro</option><option>Guanajuato</option><option>Hidalgo</option><option>Oaxaca</option><option>Otro</option>
+            </select></div>
+        </div>
+        <label for="p-direccion">Dirección del patio o base donde instalamos</label>
+        <input id="p-direccion" name="direccion" autocomplete="street-address">
+        <label for="p-corredor">Corredor principal de tu flota</label>
+        <input id="p-corredor" name="corredor" placeholder="Ej. México–Puebla–Veracruz">
+      </div>
+
+      <fieldset class="pago">
+        <legend>Forma de pago</legend>
+        <label><input type="radio" name="metodo_pago" value="tarjeta" checked> Tarjeta de crédito o débito</label>
+        <label><input type="radio" name="metodo_pago" value="mercadopago"> Mercado Pago</label>
+        <label><input type="radio" name="metodo_pago" value="transferencia"> Transferencia SPEI</label>
+      </fieldset>
+      <p class="nota-pago">Al confirmar registramos tu pedido y te enviamos a tu correo la liga de pago segura o los datos de transferencia, con tu folio. Esta página no cobra ni guarda datos de tarjeta.</p>
+      <div class="trampa" aria-hidden="true"><label for="p-web">No llenar</label><input id="p-web" name="sitio_web" tabindex="-1" autocomplete="off"></div>
+      <p class="error-form" id="p-error" role="alert" hidden></p>
+      <button class="boton" type="submit" id="p-enviar">Confirmar pedido</button>
+    </form>
+  </div>
+
+  <section id="listo" class="listo" hidden aria-live="polite"></section>
+</main>
+
+<footer class="pie">
+  <div class="marco pie-fila">
+    <a class="marca" href="index.html">NERVIK</a>
+    <p>Proyecto de Ingeniería IV, Equipo 2, IBERO Puebla. Precios en pesos mexicanos.</p>
+  </div>
+</footer>
+
+<script src="config.js"></script>
+<script src="contacto.js"></script>
+<script src="comun.js"></script>
+<script src="carrito.js"></script>
+</body>
+</html>

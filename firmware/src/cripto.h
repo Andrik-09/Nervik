@@ -14,4 +14,5 @@ namespace cripto {
   String codigoAlta();                              // NVK1:<serie>:<base64 X||Y>
   void imprimirQR(Print &out, const String &texto);
   bool regenerar();                                 // borra y crea una llave nueva
+  bool autoprueba();                                // firma y verifica un dato al azar
 }

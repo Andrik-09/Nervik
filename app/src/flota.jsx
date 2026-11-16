@@ -29,6 +29,7 @@ export function FlotaProvider({ children, onNoAutorizado }) {
   const [conectado, setConectado] = useState(false);
   const [aviso, setAviso] = useState(null);
   const [versionEventos, setVersionEventos] = useState(0);
+  const [versionComandos, setVersionComandos] = useState(0);
   const [, setTick] = useState(0);
   const previo = useRef({});
 
@@ -72,6 +73,13 @@ export function FlotaProvider({ children, onNoAutorizado }) {
       setVersionEventos(v => v + 1);
       cargarZonas();
     });
+    es.addEventListener('comando', () => setVersionComandos(v => v + 1));
+    es.addEventListener('diagnostico', ev => {
+      const d = JSON.parse(ev.data);
+      const fallas = (d.comando?.resultado?.pruebas || []).filter(p => p.ok === false).length;
+      avisar(`Diagnóstico de ${d.unidad}: ${fallas ? `${fallas} prueba${fallas > 1 ? 's' : ''} con falla` : 'todo correcto'}`, false);
+      setVersionComandos(v => v + 1);
+    });
     const t = setInterval(() => setTick(x => x + 1), 1000);
     return () => { vivo = false; es?.close(); clearInterval(t); };
   }, [avisar, cargarZonas, onNoAutorizado]);
@@ -82,7 +90,7 @@ export function FlotaProvider({ children, onNoAutorizado }) {
   }));
 
   return (
-    <Ctx.Provider value={{ unidades: lista, zonas, conectado, aviso, cerrarAviso: () => setAviso(null), versionEventos }}>
+    <Ctx.Provider value={{ unidades: lista, zonas, conectado, aviso, cerrarAviso: () => setAviso(null), versionEventos, versionComandos }}>
       {children}
     </Ctx.Provider>
   );

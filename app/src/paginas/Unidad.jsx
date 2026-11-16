@@ -4,6 +4,7 @@ import { api, llave } from '../api.js';
 import { useFlota } from '../flota.jsx';
 import Mapa from '../componentes/Mapa.jsx';
 import Senal from '../componentes/Senal.jsx';
+import Diagnostico from '../componentes/Diagnostico.jsx';
 import { ESTADOS, NIVELES, enAlerta, hace, coord, fechaHora, duracion } from '../formato.js';
 
 export default function Unidad() {
@@ -52,6 +53,8 @@ export default function Unidad() {
           </dl>
         </div>
       </div>
+
+      <Diagnostico id={u.id} unidad={u.unidad} />
 
       <h2>Huella de señal</h2>
       <p className="nota">Un inhibidor se reconoce porque la calidad GNSS cae en todos los satélites a la vez y, segundos después, se pierde la red celular, con la unidad en tramo abierto.</p>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de ventas | Nervik</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../icono.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../estilos.css">
+<style>
+  .panel { padding: 40px 0 80px; }
+  .panel h1 { font-size: 48px; margin-bottom: 8px; }
+  .pestanas { display: flex; gap: 8px; margin: 24px 0; }
+  .pestanas button { font: 600 16px var(--texto); padding: 10px 16px; border: 2px solid var(--negro); background: var(--blanco); border-radius: 3px; cursor: pointer; }
+  .pestanas button[aria-selected="true"] { background: var(--negro); color: var(--blanco); }
+  .tabla { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .tabla th, .tabla td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--linea); vertical-align: top; }
+  .tabla th { border-bottom: 2px solid var(--negro); font-weight: 600; }
+  .tabla td small { display: block; color: var(--grafito); }
+  .tabla select { font: inherit; padding: 6px; border: 2px solid var(--negro); border-radius: 3px; }
+  .acceso { max-width: 420px; display: grid; gap: 8px; }
+  .acceso input { font: inherit; padding: 12px; border: 2px solid var(--negro); border-radius: 3px; }
+  .vacia { color: var(--grafito); padding: 20px 0; }
+  .desplazable { overflow-x: auto; }
+</style>
+</head>
+<body>
+<header class="cabecera"><div class="marco cabecera-fila"><a class="marca" href="../">NERVIK</a><span>Panel de ventas del equipo</span></div></header>
+<main class="marco panel">
+  <h1>Pedidos y contactos</h1>
+  <p>Lo que llega desde la página web. Usa la misma llave de la central que la app.</p>
+
+  <form class="acceso" id="acceso">
+    <label for="llave">Llave de la central</label>
+    <input id="llave" type="password" required autocomplete="current-password">
+    <button class="boton" type="submit">Entrar</button>
+    <p class="error-form" id="error" role="alert" hidden></p>
+  </form>
+
+  <div id="contenido" hidden>
+    <div class="pestanas" role="tablist">
+      <button role="tab" aria-selected="true" data-pestana="pedidos">Pedidos</button>
+      <button role="tab" aria-selected="false" data-pestana="contactos">Contactos</button>
+    </div>
+    <div class="desplazable" id="vista"></div>
+  </div>
+</main>
+<script src="../config.js"></script>
+<script src="../comun.js"></script>
+<script>
+(function () {
+  const N = window.Nervik, $ = id => document.getElementById(id), esc = N.esc;
+  let llave = '';
+  try { llave = sessionStorage.getItem('nervik.llave.ventas') || ''; } catch {}
+  const fecha = iso => new Date(iso).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+  const ESTADOS = { pendiente_pago: 'Pendiente de pago', pagado: 'Pagado', instalado: 'Instalado', cancelado: 'Cancelado' };
+  const PAGO = { tarjeta: 'Tarjeta', mercadopago: 'Mercado Pago', transferencia: 'Transferencia' };
+  let pestana = 'pedidos';
+
+  async function pedir(ruta, opciones = {}) {
+    const r = await fetch(N.api + ruta, { ...opciones, headers: { 'content-type': 'application/json', 'x-api-key': llave } });
+    if (r.status === 401) throw new Error('La llave no es correcta.');
+    if (!r.ok) throw new Error(`Error ${r.status}`);
+    return r.json();
+  }
+
+  async function mostrar() {
+    const vista = $('vista');
+    if (pestana === 'pedidos') {
+      const l = await pedir('/api/v1/pedidos');
+      vista.innerHTML = !l.length ? '<p class="vacia">Todavía no hay pedidos.</p>' : `<table class="tabla"><thead><tr><th>Folio</th><th>Cliente</th><th>Unidades</th><th>Hoy</th><th>Mensual</th><th>Pago</th><th>Instalación</th><th>Estado</th></tr></thead><tbody>${
+        l.map(p => `<tr><td><b>${esc(p.folio)}</b><small>${fecha(p.creado)}</small></td>
+          <td>${esc(p.empresa)}<small>${esc(p.nombre)}, ${esc(p.correo)}, ${esc(p.telefono)}${p.rfc ? `, RFC ${esc(p.rfc)}` : ''}</small></td>
+          <td>${p.unidades}</td><td>${N.pesosCentavos(p.total_hoy)}</td><td>${N.pesosCentavos(p.mensual)}</td><td>${PAGO[p.metodo_pago] || esc(p.metodo_pago)}</td>
+          <td>${esc(p.estado_mx || '')}<small>${esc(p.direccion || '')}${p.corredor ? `, ${esc(p.corredor)}` : ''}</small></td>
+          <td><select data-pedido="${p.id}" aria-label="Estado del pedido ${esc(p.folio)}">${Object.entries(ESTADOS).map(([k, t]) => `<option value="${k}"${k === p.estado ? ' selected' : ''}>${t}</option>`).join('')}</select></td></tr>`).join('')
+      }</tbody></table>`;
+      vista.querySelectorAll('[data-pedido]').forEach(s => s.addEventListener('change', () => pedir(`/api/v1/pedidos/${s.dataset.pedido}`, { method: 'PATCH', body: JSON.stringify({ estado: s.value }) })));
+    } else {
+      const l = await pedir('/api/v1/prospectos');
+      vista.innerHTML = !l.length ? '<p class="vacia">Todavía no hay mensajes.</p>' : `<table class="tabla"><thead><tr><th>Fecha</th><th>Quién</th><th>Motivo</th><th>Mensaje</th></tr></thead><tbody>${
+        l.map(p => `<tr><td>${fecha(p.creado)}</td><td><b>${esc(p.empresa)}</b><small>${esc(p.nombre)}${p.correo ? `, ${esc(p.correo)}` : ''}${p.telefono && p.telefono !== '—' ? `, ${esc(p.telefono)}` : ''}</small></td><td>${esc(p.motivo || p.tipo)}</td><td>${esc(p.mensaje || (p.unidades ? `${p.unidades} unidades` : ''))}</td></tr>`).join('')
+      }</tbody></table>`;
+    }
+  }
+
+  async function entrar() {
+    try {
+      await mostrar();
+      $('acceso').hidden = true; $('contenido').hidden = false;
+      try { sessionStorage.setItem('nervik.llave.ventas', llave); } catch {}
+    } catch (e) { $('error').textContent = e.message; $('error').hidden = false; }
+  }
+  $('acceso').addEventListener('submit', e => { e.preventDefault(); llave = $('llave').value.trim(); entrar(); });
+  document.querySelectorAll('[data-pestana]').forEach(b => b.addEventListener('click', () => {
+    pestana = b.dataset.pestana;
+    document.querySelectorAll('[data-pestana]').forEach(x => x.setAttribute('aria-selected', String(x === b)));
+    mostrar();
+  }));
+  if (llave) entrar();
+})();
+</script>
+</body>
+</html>

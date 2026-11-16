@@ -5,11 +5,10 @@ Este es el prototipo de función que quedó como siguiente hipótesis en el repo
 ## Qué se conecta con qué
 
 ```
-Pico W (firmware/)  ──Wi-Fi o SIM7080G──►  API (npm run prototipo)  ──►  App del centro de control (/app)
-                                                    └────────────────►  Página web (/), sección "Prototipo en vivo"
+Pico W (firmware/)  ──Wi-Fi o SIM7080G──►  API (npm run prototipo)  ◄──►  App de monitoreo (/app)
 ```
 
-El prototipo firma cada mensaje con su propia llave. La app lo muestra como una unidad más; la página web muestra su estado en vivo y, cuando genera un expediente, lo pone en lugar del expediente de ejemplo.
+El prototipo firma cada mensaje con su propia llave y la app lo muestra como una unidad más: posición, señal, alertas, expedientes y **pruebas a distancia**. La página web (/) es solo de promoción y venta; no se conecta al prototipo.
 
 ## Material
 
@@ -43,7 +42,7 @@ El prototipo firma cada mensaje con su propia llave. La app lo muestra como una 
 4. Conecten la Pico manteniendo presionado **BOOTSEL** la primera vez y den **Upload** (flecha) en la barra de PlatformIO, con el entorno `pico_w_wifi`.
 5. Abran el **Serial Monitor** (enchufe) a 115200. Al arrancar se imprimen el **código QR**, el **código de alta** `NVK1:NVK-P001:…` y la llave pública.
 
-Comandos del monitor serie: `alta` (vuelve a mostrar el QR), `estado`, `simulacro`, `vaciar-cola`, `nueva-llave SI`.
+Comandos del monitor serie: `alta` (vuelve a mostrar el QR), `estado`, `diagnostico`, `simulacro`, `vaciar-cola`, `nueva-llave SI`.
 
 ## Darlo de alta en la app
 
@@ -60,14 +59,20 @@ Mantengan presionado el **botón de prueba 3 s** (o escriban `simulacro` en el m
 
 | Segundo | Qué pasa | Qué se ve |
 |---|---|---|
-| 0–12 | El C/N0 baja 1.1 dB/s en todos los satélites | LED de alerta lento; la app y la web pasan a **N1** |
+| 0–12 | El C/N0 baja 1.1 dB/s en todos los satélites | LED de alerta lento; la app pasa a **N1** |
 | 14 | El nivel de la señal celular cae 20 dB | Buzzer; **N2**, alerta temprana enviada |
 | 18 | Deja de transmitir (como con jammer) | Los mensajes se guardan en la flash |
-| ~63 | La central no recibe nada con motor encendido | App y web: **«Sin señal · posible inhibidor»** |
+| ~63 | La central no recibe nada con motor encendido | App: **«Sin señal · posible inhibidor»** |
 | 85 | Detenido 60 s con motor encendido | LED de alerta fijo, **N3** |
 | 100–120 | Regresan GNSS y red | Se envía la cola en orden y llega el **expediente firmado** |
 
-Todo lo que se genera va marcado como **SIMULACRO** en la app, la web y el expediente, y no cuenta para las zonas de riesgo. El LED de energía parpadea mientras dura.
+También se puede iniciar desde la app: **Pruebas → Prueba de alerta**. Todo lo que se genera va marcado como **SIMULACRO** en la app y en el expediente, y no cuenta para las zonas de riesgo. El LED de energía parpadea mientras dura.
+
+## Pruebas y diagnóstico desde la app
+
+En **Pruebas** (o en el detalle de cada unidad) el botón **Hacer diagnóstico** manda la orden al equipo. La orden viaja en la respuesta a su siguiente reporte (máximo 10 s en el prototipo) y el equipo contesta con un mensaje firmado que revisa: receptor GNSS, posición, red, bus J1939, IMU, energía, batería, memoria y cola, firma digital, reloj, luces y buzzer (destellan para confirmarlo a simple vista) y el estado de la detección. Lo que no está conectado aparece como «no instalado». **Diagnosticar toda la flota** lo pide a todos los equipos a la vez. La pulsación corta del botón de prueba de la Pico hace el mismo diagnóstico y el resultado también aparece en la app.
+
+Las órdenes solo actúan sobre el equipo, nunca sobre el vehículo (requisito I-02).
 
 ## Prueba real de la hipótesis (sin inhibidor)
 

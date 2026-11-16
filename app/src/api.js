@@ -25,7 +25,8 @@ export const api = {
   eventos: () => pedir('/api/v1/eventos?limite=300'),
   evento: id => pedir(`/api/v1/eventos/${encodeURIComponent(id)}`),
   zonas: () => pedir('/api/v1/riesgo/zonas'),
-  prospectos: () => pedir('/api/v1/prospectos'),
+  comandos: id => pedir(`/api/v1/unidades/${encodeURIComponent(id)}/comandos`),
+  pedirComando: (id, tipo) => pedir(`/api/v1/unidades/${encodeURIComponent(id)}/comandos`, { method: 'POST', body: JSON.stringify({ tipo }) }),
   alta: datos => pedir('/api/v1/dispositivos', { method: 'POST', body: JSON.stringify(datos) }),
   stream: () => new EventSource(`${BASE}/api/v1/stream?key=${encodeURIComponent(llave())}`),
 };

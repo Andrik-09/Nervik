@@ -1,6 +1,12 @@
 # Nervik
 
-Software de Nervik: la **app del centro de control**, la **API** que recibe la evidencia firmada de los dispositivos, la **página web B2B** y el **firmware del prototipo** (Raspberry Pi Pico). Incluye un **simulador** de flota para trabajar sin hardware.
+Software de Nervik, en tres partes con propósitos distintos:
+
+- **Página web** (`/`): promoción y venta. Qué es Nervik, cómo funciona, la app, planes y precios, aseguradoras, preguntas, la bitácora del proyecto, canales de contacto, formulario «Contáctanos» y **tienda con carrito** (dispositivo + plan mensual).
+- **App de monitoreo** (`/app`): el centro de control en tiempo real. Todas las unidades en carretera, alertas, expedientes firmados, **pruebas y diagnóstico a distancia** e instalación de equipos. Se vincula con el prototipo.
+- **Firmware del prototipo** (`firmware/`): Raspberry Pi Pico W con GNSS, que se conecta a la app.
+
+Además: la **API** que une todo, un **panel de ventas** para el equipo (`/admin`, pedidos y mensajes de la web) y un **simulador** de flota para trabajar sin hardware.
 
 - **Instalar la app en el celular o la computadora:** [docs/instalar-app.md](docs/instalar-app.md)
 - **Armar el prototipo y conectarlo a la app y la web:** [docs/prototipo.md](docs/prototipo.md)
@@ -16,7 +22,7 @@ Proyecto de Ingeniería IV · Equipo 2 · IBERO Puebla
 
 ```bash
 npm install
-npm run prototipo    # todo en una dirección: web en http://localhost:3000 · app en http://localhost:3000/app
+npm run prototipo    # web: http://localhost:3000   app: http://localhost:3000/app   ventas: http://localhost:3000/admin
 ```
 
 La llave de la central en local es `dev-central`. Para ver la app con muchas unidades sin hardware, en otra terminal:
@@ -35,15 +41,16 @@ Para abrir la app desde el celular, conéctalo a la misma red Wi-Fi y entra a la
 2. A los ~20 s el simulador lanza un ataque: la franja superior se pone negra con la **alerta temprana** (N1–N2), que el equipo alcanza a mandar antes de perder la red.
 3. La unidad se queda sin señal. A los 45 s la central la marca como **«Sin señal · posible inhibidor»** con su última posición válida, aunque el equipo ya no pueda transmitir.
 4. Al minuto regresa la señal y llega el **expediente firmado**. En **Expedientes** se abre la línea de tiempo y el botón **Verificar en este navegador** comprueba la firma sin depender del servidor.
-5. El formulario de la web aparece en **Prospectos**.
+5. En **Pruebas**, **Hacer diagnóstico** revisa cada parte del equipo a distancia.
+6. En la web, agrega unidades al carrito y confirma un pedido; aparece en `/admin` con su folio.
 
 ## Estructura
 
 | Carpeta | Qué contiene |
 |---|---|
-| `api/` | Node.js + Express. Verificación de firmas, contador anti-reenvío, cadena de expedientes, tiempo real (SSE), zonas de riesgo, prospectos. Pruebas en `api/test/`. |
-| `app/` | React + Vite, PWA. Monitor, detalle de unidad, expedientes, instalación con autoprueba, prospectos. |
-| `web/` | Página de venta en HTML/CSS. Se puede publicar tal cual en GitHub Pages. |
+| `api/` | Node.js + Express. Verificación de firmas, contador anti-reenvío, cadena de expedientes, tiempo real (SSE), zonas de riesgo, órdenes de diagnóstico, catálogo, pedidos y contacto. Pruebas en `api/test/`. |
+| `app/` | React + Vite, PWA. Monitor en tiempo real, detalle de unidad, expedientes, pruebas y diagnóstico, instalación en 3 pasos. |
+| `web/` | Página de promoción y venta (HTML/CSS/JS sin dependencias): carrito en `carrito.html`, panel de ventas en `admin/`. **Los canales de contacto se llenan en `web/contacto.js`.** |
 | `firmware/` | Firmware del prototipo (PlatformIO, Raspberry Pi Pico W o Pico + SIM7080G): GNSS, detección N0–N3, firma, cola sin red, LED, botones y simulacro. |
 | `simulador/` | Gemelo digital de los dispositivos y referencia del protocolo para el firmware. |
 | `docs/` | `instalar-app.md`, `prototipo.md`, `protocolo.md` (contrato con el firmware) y `arquitectura.md`. |
@@ -67,6 +74,7 @@ Copia `.env.example` y ajusta. Lo importante para producción es cambiar `CENTRA
 ![Monitor con unidad sin señal](docs/capturas/monitor-alerta.png)
 ![Detalle de unidad con huella de señal](docs/capturas/unidad.png)
 ![Autoprueba de instalación](docs/capturas/instalacion.png)
+![Pruebas y diagnóstico a distancia](docs/capturas/pruebas.png)
 ![Página web](docs/capturas/web.png)
 
 Los mapas se ven en gris en las capturas porque se tomaron sin acceso a OpenStreetMap; en tu computadora cargan las calles.

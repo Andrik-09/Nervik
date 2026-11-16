@@ -76,3 +76,43 @@ const colTel = db.prepare("SELECT name FROM pragma_table_info('telemetria')").al
 for (const [col, def] of [['simulacro', 'INTEGER NOT NULL DEFAULT 0'], ['fix', 'INTEGER'], ['bus', 'INTEGER'], ['firmware', 'TEXT']]) {
   if (!colTel.includes(col)) db.exec(`ALTER TABLE telemetria ADD COLUMN ${col} ${def}`);
 }
+
+const colPro = db.prepare("SELECT name FROM pragma_table_info('prospectos')").all().map(c => c.name);
+for (const col of ['motivo', 'mensaje']) if (!colPro.includes(col)) db.exec(`ALTER TABLE prospectos ADD COLUMN ${col} TEXT`);
+
+db.exec(`
+CREATE TABLE IF NOT EXISTS pedidos (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  folio         TEXT UNIQUE,
+  nombre        TEXT NOT NULL,
+  empresa       TEXT NOT NULL,
+  rfc           TEXT,
+  correo        TEXT NOT NULL,
+  telefono      TEXT NOT NULL,
+  estado_mx     TEXT,
+  direccion     TEXT,
+  corredor      TEXT,
+  unidades      INTEGER NOT NULL,
+  metodo_pago   TEXT NOT NULL,                 -- tarjeta | transferencia | mercadopago
+  subtotal_hoy  REAL NOT NULL,                 -- dispositivos + primer mes, sin IVA
+  iva_hoy       REAL NOT NULL,
+  total_hoy     REAL NOT NULL,
+  mensual       REAL NOT NULL,                 -- a partir del segundo mes, con IVA
+  estado        TEXT NOT NULL DEFAULT 'pendiente_pago', -- pendiente_pago | pagado | instalado | cancelado
+  notas         TEXT,
+  creado        TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+);
+
+-- Órdenes de la app hacia el equipo (no hacia el vehículo): diagnóstico y prueba de alerta
+CREATE TABLE IF NOT EXISTS comandos (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  dispositivo_id TEXT NOT NULL REFERENCES dispositivos(id),
+  tipo           TEXT NOT NULL,                -- diagnostico | simulacro
+  estado         TEXT NOT NULL DEFAULT 'pendiente', -- pendiente | entregado | completado
+  resultado      TEXT,                         -- JSON que reporta el equipo (firmado)
+  creado         TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
+  entregado      TEXT,
+  completado     TEXT
+);
+CREATE INDEX IF NOT EXISTS ix_cmd_disp ON comandos(dispositivo_id, id DESC);
+`);

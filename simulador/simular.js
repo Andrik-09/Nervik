@@ -58,10 +58,33 @@ const r4 = x => Math.round(x * 1e5) / 1e5;
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 
 // ---------- red ----------
-async function enviar(sobre) {
+// Las órdenes de la app (diagnóstico, prueba de alerta) llegan en la respuesta de la API
+const pendientes = [];
+async function enviar(sobre, unidad) {
   const r = await fetch(`${API}/api/v1/dispositivo/mensajes`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(sobre) });
-  if (!r.ok) console.warn('  respuesta', r.status, await r.text());
+  if (!r.ok) { console.warn('  respuesta', r.status, await r.text()); return r; }
+  const cuerpo = await r.clone().json().catch(() => ({}));
+  for (const c of cuerpo.comandos || []) if (unidad) pendientes.push({ unidad, ...c });
   return r;
+}
+
+function diagnostico(u, comandoId) {
+  const t = u.ultimaTel || {};
+  const pruebas = [
+    { prueba: 'receptor_gnss', ok: true, valor: 'recibe tramas NMEA' },
+    { prueba: 'posicion_gnss', ok: (t.sats ?? 10) >= 4, valor: `${t.sats ?? 10} sat, C/N0 ${t.cn0 ?? 41} dB-Hz` },
+    { prueba: 'red', ok: true, valor: `LTE-M ${t.rssi ?? -75} dBm` },
+    { prueba: 'bus_j1939', ok: true, valor: 'recibe tramas (solo escucha)' },
+    { prueba: 'imu', ok: true, valor: 'LSM6DSOX responde' },
+    { prueba: 'alimentacion', ok: true, valor: `${t.alimentacion ?? 27.2} V` },
+    { prueba: 'bateria', ok: (t.bateria ?? 90) >= 20, valor: `${t.bateria ?? 90} %` },
+    { prueba: 'memoria', ok: true, valor: '24 de 1024 kB, 0 en cola' },
+    { prueba: 'firma', ok: true, valor: 'ECDSA P-256 correcta' },
+    { prueba: 'reloj', ok: true, valor: new Date().toISOString().slice(0, 19) + 'Z' },
+    { prueba: 'luces_y_buzzer', ok: true, valor: 'destello realizado', detalle: 'Confirmar a simple vista que encendieron los 3 LED y sonó el buzzer' },
+    { prueba: 'deteccion', ok: true, valor: `nivel N${u.ataque ? 1 : 0}, base C/N0 41.0 dB-Hz` },
+  ];
+  return u.d.sobre('diagnostico', { comando_id: comandoId, ok: pruebas.every(p => p.ok !== false), pruebas, firmware: 'sim-0.1' });
 }
 async function alta(d) {
   const r = await fetch(`${API}/api/v1/dispositivos`, {
@@ -148,30 +171,32 @@ class Unidad {
   }
   telemetria(nivel, cn0, sats, rssi) {
     const [lat, lon] = this.pos();
-    return this.d.sobre('telemetria', {
+    this.ultimaTel = {
       lat: r4(lat), lon: r4(lon), vel: Math.round(this.vel), nivel,
       cn0: Math.round(cn0 * 10) / 10, sats, rssi: Math.round(rssi), motor: 1,
       bateria: Math.round(this.bateria), alimentacion: Math.round(azar(26.8, 27.8) * 10) / 10,
-    });
+      ...(this.ataque?.simulacro ? { simulacro: true } : {}),
+    };
+    return this.d.sobre('telemetria', this.ultimaTel);
   }
 }
 
 async function ciclo(u) {
   u.avanzar();
   const a = u.ataque;
-  if (!a) return enviar(u.telemetria(0, azar(38, 44), Math.floor(azar(9, 14)), azar(-85, -70)));
+  if (!a) return enviar(u.telemetria(0, azar(38, 44), Math.floor(azar(9, 14)), azar(-85, -70)), u);
 
   const s = (Date.now() - a.t0) / 1000;
   const [lat, lon] = u.pos();
   if (s < 4) {                       // N1: anomalía GNSS, la red todavía funciona → alerta temprana
     if (!a.n1) { a.n1 = true; a.linea.push({ ts: new Date().toISOString(), tipo: 'gnss_degradado', detalle: `C/N0 cae en todos los satélites a la vez a ${Math.round(u.vel)} km/h`, lat: r4(lat), lon: r4(lon), vel: Math.round(u.vel) }); a.pos = [lat, lon]; a.vel = Math.round(u.vel); }
-    return enviar(u.telemetria(1, azar(15, 19), 3, -95));
+    return enviar(u.telemetria(1, azar(15, 19), 3, -95), u);
   }
   if (!a.n2) {                       // N2: último mensaje antes de que caiga la red
     a.n2 = true;
     a.linea.push({ ts: new Date().toISOString(), tipo: 'red_perdida', detalle: 'Se pierde la red celular. Alerta en cabina encendida.', lat: r4(lat), lon: r4(lon), vel: Math.round(u.vel) });
     console.log(`  ${u.d.unidad}: red perdida — silencio de ${SILENCIO_S} s`);
-    return enviar(u.telemetria(2, 0, 0, -113));
+    return enviar(u.telemetria(2, 0, 0, -113), u);
   }
   if (s < SILENCIO_S) {              // silencio: el equipo sigue registrando pero no puede transmitir
     if (s > 15 && !a.parada) {
@@ -184,8 +209,8 @@ async function ciclo(u) {
   }
   // recuperación: se envía el expediente y se retoma la telemetría
   a.linea.push({ ts: new Date().toISOString(), tipo: 'fin_interferencia', detalle: 'Regresan GNSS y red. Expediente enviado a la central.' });
-  const exp = expediente(new Date(a.t0), a.pos, a.vel, true, a.linea);
-  const r = await enviar(u.d.sobre('evento', exp));
+  const exp = { ...expediente(new Date(a.t0), a.pos, a.vel, true, a.linea), ...(a.simulacro ? { simulacro: true } : {}) };
+  const r = await enviar(u.d.sobre('evento', exp), u);
   console.log(`  ${u.d.unidad}: expediente enviado (${r.status})`);
   u.ataque = null;
   u.vel = 60;
@@ -223,6 +248,11 @@ async function main() {
       console.log(`» Ataque con inhibidor sobre ${u.d.unidad} (${u.d.corredor})`);
     }
     for (const u of unidades) { try { await ciclo(u); } catch (e) { console.warn(u.d.unidad, e.message); } }
+    while (pendientes.length) {
+      const c = pendientes.shift();
+      if (c.tipo === 'diagnostico') { await enviar(diagnostico(c.unidad, c.id), c.unidad); console.log(`  ${c.unidad.d.unidad}: diagnóstico enviado`); }
+      if (c.tipo === 'simulacro' && !c.unidad.ataque) { c.unidad.ataque = { t0: Date.now(), linea: [], simulacro: true }; console.log(`» Prueba de alerta pedida desde la app en ${c.unidad.d.unidad}`); }
+    }
     guardar(flota);
   }, PERIODO_S * 1000);
 }

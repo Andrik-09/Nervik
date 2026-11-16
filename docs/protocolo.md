@@ -82,6 +82,19 @@ Se envía cuando termina la interferencia (o cuando regresa la red, si el equipo
 
 Los mensajes se guardan en la flash (LittleFS en el prototipo; W25Q64 en la PCB) y se envían **en el orden en que se firmaron**, porque la API exige contador creciente.
 
-## 6. Campos adicionales del prototipo
+## 6. Órdenes de la app y diagnóstico
+
+Las respuestas 201/202 traen `comandos`: una lista de órdenes pendientes `{ "id": 7, "tipo": "diagnostico" | "simulacro" }`. Así no hace falta que el equipo tenga IP pública. Al recibir `diagnostico`, el equipo contesta con un mensaje firmado:
+
+```json
+{ "dispositivo": "NVK-P001", "tipo": "diagnostico", "contador": 1901, "comando_id": 7, "ok": true,
+  "pruebas": [ { "prueba": "posicion_gnss", "ok": true, "valor": "9 sat, C/N0 41.2 dB-Hz" },
+               { "prueba": "bus_j1939", "ok": null, "valor": "no instalado" } ],
+  "firmware": "0.1.0" }
+```
+
+`ok: null` significa que el módulo no está instalado. Sin `comando_id` (diagnóstico pedido con el botón del equipo) la API lo registra igual. Las órdenes nunca actúan sobre el vehículo.
+
+## 7. Campos adicionales del prototipo
 
 Telemetría: `fix` (el GNSS tiene posición), `bus` (llegan tramas J1939), `firmware` (versión) y `simulacro` (prueba sin inhibidor). Expediente: `simulacro` y `firmware`. La API devuelve `hora` en cada respuesta para que el equipo sincronice su reloj cuando no tiene GNSS.
