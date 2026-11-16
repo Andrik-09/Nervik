@@ -204,3 +204,4 @@ details p { margin: 12px 0 0; max-width: 64ch; }
   .entrada-oscura { font-size: 20px; }
   .canales a, .canales span { grid-template-columns: 96px 1fr; }
 }
+.aviso-vista-previa { margin: 0; padding: 8px 24px; background: var(--concreto); border-bottom: 1px solid var(--linea); font-size: 14px; text-align: center; }

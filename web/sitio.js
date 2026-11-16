@@ -79,6 +79,7 @@
     if (!d.correo && !d.telefono) { err.textContent = 'Déjanos un correo o un teléfono para responderte.'; err.hidden = false; return; }
     d.tipo = d.motivo === 'aseguradora' ? 'aseguradora' : 'flota';
     d.origen = 'web-contacto';
+    if (N.vistaPrevia) { err.textContent = N.mensajeVistaPrevia; err.hidden = false; return; }
     const b = $('c-enviar');
     b.disabled = true; b.textContent = 'Enviando…';
     try {

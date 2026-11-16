@@ -38,8 +38,13 @@
 
   const api = window.NERVIK_API ?? ((location.port === '8080' || location.protocol === 'file:') ? 'http://localhost:3000' : '');
 
+  // Vista previa sin servidor (p. ej. publicada como página estática): no hay tienda ni formularios que guarden.
+  const vistaPrevia = !!window.NERVIK_VISTA_PREVIA;
+
   window.Nervik = {
     api,
+    vistaPrevia,
+    mensajeVistaPrevia: 'Esta es una vista previa de la página: los pedidos y mensajes se guardan cuando la página se publica con su servidor.',
     catalogo: CATALOGO_BASE,
     carrito: { leer, guardar, agregar: n => { const c = leer(); guardar({ unidades: Math.min(500, (c.unidades || 0) + n) }); } },
     cotizar,
@@ -50,6 +55,13 @@
   };
   document.addEventListener('DOMContentLoaded', () => {
     pintarContador();
+    if (vistaPrevia) {
+      const aviso = document.createElement('p');
+      aviso.className = 'aviso-vista-previa';
+      aviso.textContent = 'Vista previa. La tienda, el formulario de contacto y la app funcionan cuando la página se publica con su servidor.';
+      document.body.prepend(aviso);
+      document.querySelectorAll('a[href="/app/"]').forEach(a => { a.href = 'index.html#app'; });
+    }
     // menú en pantallas angostas
     const cab = document.querySelector('.cabecera'), b = document.querySelector('.abrir-menu');
     if (!cab || !b) return;

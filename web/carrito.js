@@ -41,6 +41,7 @@
     err.hidden = true;
     if (falta.length) { err.textContent = `Falta ${falta.join(', ')}.`; err.hidden = false; return; }
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.correo)) { err.textContent = 'Revisa el correo: ahí te llega la liga de pago.'; err.hidden = false; return; }
+    if (N.vistaPrevia) { err.textContent = N.mensajeVistaPrevia; err.hidden = false; return; }
     const b = $('p-enviar');
     b.disabled = true; b.textContent = 'Confirmando…';
     try {
