@@ -9,6 +9,7 @@ function pemABytes(pem) {
 }
 
 export async function verificarExpediente(sobre, llavePem) {
+  if (!window.isSecureContext || !crypto.subtle) throw new Error('el navegador solo verifica firmas en https o en localhost');
   const bytes = b64aBytes(sobre.payload);
   const firma = b64aBytes(sobre.firma);
   const llave = await crypto.subtle.importKey('spki', pemABytes(llavePem), { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);

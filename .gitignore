@@ -5,3 +5,5 @@ simulador/.estado-simulador.json
 .env
 *.log
 .DS_Store
+firmware/.pio/
+firmware/include/config.h

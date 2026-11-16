@@ -78,3 +78,23 @@ test('formulario web guarda prospectos', async () => {
   const p = await get('/api/v1/prospectos');
   assert.equal(p[0].empresa, 'Transportes X');
 });
+
+test('alta con el código del firmware (NVK1:serie:llave) y demo pública', async () => {
+  const p = new Dispositivo({ id: 'NVK-P001', unidad: 'PROTO-1' });
+  const jwk = (await import('node:crypto')).createPublicKey(p.llavePublicaPem).export({ format: 'jwk' });
+  const xy = Buffer.concat([Buffer.from(jwk.x, 'base64url'), Buffer.from(jwk.y, 'base64url')]).toString('base64');
+  const r = await post('/api/v1/dispositivos', { codigo: `NVK1:NVK-P001:${xy}`, unidad: 'PROTO-1' });
+  assert.equal(r.status, 201);
+  assert.equal((await post('/api/v1/dispositivo/mensajes', p.sobre('telemetria', { lat: 19.0412, lon: -98.2063, vel: 0, motor: 1, cn0: 40, sats: 9 }))).status, 202);
+  const exp = { inicio: new Date().toISOString(), fin: new Date().toISOString(), nivel_max: 3, simulacro: true, ultima_pos: { lat: 19.04, lon: -98.2 }, linea_tiempo: [{ ts: new Date().toISOString(), tipo: 'gnss_degradado', detalle: 'prueba' }] };
+  assert.equal((await post('/api/v1/dispositivo/mensajes', p.sobre('evento', exp))).status, 201);
+  const demo = await fetch(base + '/api/v1/demo').then(x => x.json());
+  assert.equal(demo.dispositivo, 'NVK-P001');
+  assert.equal(demo.ultima.lat, 19.04); // redondeada
+  assert.equal(demo.expediente.simulacro, true);
+  assert.equal(demo.expediente.firma_valida, true);
+  const zonas = await get('/api/v1/riesgo/zonas');
+  assert.equal(zonas.zonas.reduce((s, z) => s + z.eventos, 0), 2); // los simulacros no cuentan como riesgo
+  const csv = await fetch(base + '/api/v1/unidades/NVK-P001/telemetria.csv', { headers: H }).then(x => x.text());
+  assert.match(csv, /^ts,recibido,lat/);
+});

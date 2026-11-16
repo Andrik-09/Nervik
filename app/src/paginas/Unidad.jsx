@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api } from '../api.js';
+import { api, llave } from '../api.js';
 import { useFlota } from '../flota.jsx';
 import Mapa from '../componentes/Mapa.jsx';
 import Senal from '../componentes/Senal.jsx';
@@ -19,6 +19,13 @@ export default function Unidad() {
     api.unidad(id).then(setDet).catch(e => setError(e.message));
   }, [id, marcaTiempo, versionEventos]);
 
+  async function descargarCsv() {
+    const r = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/unidades/${encodeURIComponent(id)}/telemetria.csv`, { headers: { 'x-api-key': llave() } });
+    const url = URL.createObjectURL(await r.blob());
+    Object.assign(document.createElement('a'), { href: url, download: `telemetria-${id}.csv` }).click();
+    URL.revokeObjectURL(url);
+  }
+
   if (error) return <p className="error">{error}</p>;
   if (!det) return <p>Cargando…</p>;
   const u = vivo || det;
@@ -29,7 +36,7 @@ export default function Unidad() {
       <p className="miga"><Link to="/">Monitor</Link> / {u.unidad}</p>
       <section className={enAlerta(u) ? 'franja franja-alerta' : 'franja'}>
         <h1>{u.unidad} · {ESTADOS[u.estado]?.texto}</h1>
-        <p>{u.corredor} · Dispositivo {u.id} · Último reporte {hace(u.segundos ?? u.segundos_sin_reporte)} · Nivel del equipo: {NIVELES[u.nivel]}</p>
+        <p>{u.ultima?.simulacro && <span className="etiqueta-sim">SIMULACRO</span>}{u.corredor || 'Sin corredor'} · Dispositivo {u.id}{u.ultima?.firmware ? ` · firmware ${u.ultima.firmware}` : ''} · Último reporte {hace(u.segundos ?? u.segundos_sin_reporte)} · Nivel del equipo: {NIVELES[u.nivel]}</p>
       </section>
 
       <div className="dos-col">
@@ -53,6 +60,11 @@ export default function Unidad() {
         <Senal datos={det.telemetria} campo="rssi" titulo="Red celular" unidad="dBm" min={-120} max={-60} />
         <Senal datos={det.telemetria} campo="vel" titulo="Velocidad" unidad="km/h" min={0} max={110} />
       </div>
+
+      <p className="acciones">
+        <button className="btn btn-sec" onClick={descargarCsv}>Descargar datos crudos (CSV)</button>
+        <span className="nota">Cada reporte con C/N0, satélites y red: sirve para medir falsas alarmas (F-02) y entrenar el modelo.</span>
+      </p>
 
       <h2>Expedientes de esta unidad ({det.eventos.length})</h2>
       <ul className="lista-eventos">

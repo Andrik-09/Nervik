@@ -1,5 +1,5 @@
 // Gemelo digital de un dispositivo Nervik: genera llaves, firma mensajes y lleva
-// el contador y la cadena de hashes igual que lo hará el firmware del ESP32-S3.
+// el contador y la cadena de hashes igual que el firmware del RP2040 (firmware/).
 import { generateKeyPairSync, createPrivateKey, createPublicKey, sign, createHash } from 'node:crypto';
 
 const CERO = '0'.repeat(64);

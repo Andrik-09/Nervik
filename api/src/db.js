@@ -68,3 +68,11 @@ CREATE TABLE IF NOT EXISTS prospectos (
   creado    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
 `);
+
+// Migraciones simples (columnas agregadas después de la v0.1)
+const columnas = db.prepare("SELECT name FROM pragma_table_info('eventos')").all().map(c => c.name);
+if (!columnas.includes('simulacro')) db.exec('ALTER TABLE eventos ADD COLUMN simulacro INTEGER NOT NULL DEFAULT 0');
+const colTel = db.prepare("SELECT name FROM pragma_table_info('telemetria')").all().map(c => c.name);
+for (const [col, def] of [['simulacro', 'INTEGER NOT NULL DEFAULT 0'], ['fix', 'INTEGER'], ['bus', 'INTEGER'], ['firmware', 'TEXT']]) {
+  if (!colTel.includes(col)) db.exec(`ALTER TABLE telemetria ADD COLUMN ${col} ${def}`);
+}

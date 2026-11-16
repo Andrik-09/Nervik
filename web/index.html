@@ -16,6 +16,7 @@
     <a class="logo" href="#">NERVIK</a>
     <nav aria-label="Secciones">
       <a href="#como">Cómo funciona</a>
+      <a href="#prototipo">Prototipo</a>
       <a href="#aseguradoras">Aseguradoras</a>
       <a href="#precio">Precio</a>
       <a href="#preguntas">Preguntas</a>
@@ -53,9 +54,24 @@
   </div>
 </div></section>
 
+<section id="prototipo"><div class="wrap">
+  <h2>Prototipo en vivo</h2>
+  <p>Estos datos llegan en este momento del prototipo del equipo (Raspberry Pi Pico con receptor GNSS), firmados por el propio dispositivo. La posición se muestra redondeada a 1 km.</p>
+  <div class="vivo" id="vivo" aria-live="polite">
+    <div class="vivo-estado"><span class="punto" id="v-punto"></span><b id="v-estado">Conectando con el prototipo…</b><span id="v-sim" class="etiqueta hidden">SIMULACRO</span></div>
+    <div class="vivo-datos">
+      <div><span>Calidad GNSS</span><b id="v-cn0">—</b></div>
+      <div><span>Satélites</span><b id="v-sats">—</b></div>
+      <div><span>Red</span><b id="v-red">—</b></div>
+      <div><span>Último reporte</span><b id="v-hace">—</b></div>
+    </div>
+    <p class="small" id="v-nota">En clase se demuestra con un simulacro: el equipo recrea la huella de un inhibidor sin emitir interferencia, porque usar un inhibidor real es ilegal.</p>
+  </div>
+</div></section>
+
 <section id="expediente"><div class="wrap">
   <h2>Así se ve un expediente</h2>
-  <div class="exp">
+  <div class="exp" id="exp">
     <span class="stamp">EJEMPLO ILUSTRATIVO · DATOS FICTICIOS</span>
     <div class="row"><span>Unidad</span><span>ECO-14 · Corredor Puebla–Oaxaca</span></div>
     <div class="row"><span>02:14:07</span><span>Caída de señal en todos los satélites a la vez (no es túnel: la unidad iba a 82 km/h en tramo abierto)</span></div>
@@ -126,5 +142,6 @@
 
 <script src="config.js"></script>
 <script src="formulario.js"></script>
+<script src="en-vivo.js"></script>
 </body>
 </html>

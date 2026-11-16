@@ -57,7 +57,10 @@ export default function Expediente() {
           <h1>Expediente de evento · {e.unidad}</h1>
           <p>{e.corredor} · Dispositivo {e.dispositivo_id}</p>
         </div>
-        <span className="sello">{NIVELES[e.nivel_max]}</span>
+        <div className="sellos">
+          {e.simulacro && <span className="sello sello-sim">SIMULACRO · prueba sin inhibidor</span>}
+          <span className="sello">{NIVELES[e.nivel_max]}</span>
+        </div>
       </header>
 
       <div className="dos-col">

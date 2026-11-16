@@ -122,3 +122,14 @@ dd { margin: 0; font-weight: 700; }
   .mapa { height: 220px !important; }
   body { font-size: 12px; }
 }
+
+/* prototipo, simulacro e instalación */
+.sellos { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.sello-sim { background: var(--w); border-style: dashed; }
+.etiqueta-sim { display: inline-block; border: 2px dashed currentColor; padding: 0 6px; margin: 0 8px; font-size: 12px; font-weight: 700; }
+.pruebas li.falla { color: var(--k); font-weight: 700; }
+.pruebas li.na { color: var(--g2); }
+.camara { display: grid; gap: 8px; }
+.camara video { width: 100%; max-width: 420px; border: 2px solid var(--k); border-radius: 6px; }
+.ilustracion { border: 2px solid var(--k); border-radius: 6px; padding: 10px; }
+.acciones { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 12px; }

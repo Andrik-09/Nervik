@@ -28,7 +28,7 @@ export default function Expedientes() {
         {vis.map(e => (
           <li key={e.id}><Link to={`/expedientes/${e.id}`}>
             <b>{e.unidad} · {fechaHora(e.inicio)}</b>
-            <span>{NIVELES[e.nivel_max]} · {duracion(e.inicio, e.fin)} · {e.corredor} · {coord(e.lat, e.lon)}{e.cadena_integra ? '' : ' · ⚠ cadena rota'}</span>
+            <span>{NIVELES[e.nivel_max]} · {duracion(e.inicio, e.fin)} · {e.corredor} · {coord(e.lat, e.lon)}{e.cadena_integra ? '' : ' · ⚠ cadena rota'}{e.simulacro ? ' · SIMULACRO' : ''}</span>
           </Link></li>
         ))}
       </ul>

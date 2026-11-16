@@ -1,6 +1,9 @@
 # Nervik
 
-Software de Nervik: la **app del centro de control**, la **API** que recibe la evidencia firmada de los dispositivos y la **página web B2B**. Incluye un **simulador** de flota para trabajar sin hardware.
+Software de Nervik: la **app del centro de control**, la **API** que recibe la evidencia firmada de los dispositivos, la **página web B2B** y el **firmware del prototipo** (Raspberry Pi Pico). Incluye un **simulador** de flota para trabajar sin hardware.
+
+- **Instalar la app en el celular o la computadora:** [docs/instalar-app.md](docs/instalar-app.md)
+- **Armar el prototipo y conectarlo a la app y la web:** [docs/prototipo.md](docs/prototipo.md)
 
 Proyecto de Ingeniería IV · Equipo 2 · IBERO Puebla
 
@@ -13,17 +16,16 @@ Proyecto de Ingeniería IV · Equipo 2 · IBERO Puebla
 
 ```bash
 npm install
-npm run dev          # API :3000 · app :5173 · web :8080
+npm run prototipo    # todo en una dirección: web en http://localhost:3000 · app en http://localhost:3000/app
 ```
 
-En otra terminal, la flota simulada:
+La llave de la central en local es `dev-central`. Para ver la app con muchas unidades sin hardware, en otra terminal:
 
 ```bash
 npm run simular      # 6 unidades, historial de 60 días y un ataque cada 75 s
 ```
 
-- App del centro de control: http://localhost:5173 (llave de desarrollo: `dev-central`)
-- Página web: http://localhost:8080
+Para programar con recarga automática: `npm run dev` (API :3000 · app http://localhost:5173/app · web :8080).
 
 Para abrir la app desde el celular, conéctalo a la misma red Wi-Fi y entra a la dirección `Network` que imprime Vite (por ejemplo `http://192.168.1.20:5173`).
 
@@ -42,14 +44,17 @@ Para abrir la app desde el celular, conéctalo a la misma red Wi-Fi y entra a la
 | `api/` | Node.js + Express. Verificación de firmas, contador anti-reenvío, cadena de expedientes, tiempo real (SSE), zonas de riesgo, prospectos. Pruebas en `api/test/`. |
 | `app/` | React + Vite, PWA. Monitor, detalle de unidad, expedientes, instalación con autoprueba, prospectos. |
 | `web/` | Página de venta en HTML/CSS. Se puede publicar tal cual en GitHub Pages. |
+| `firmware/` | Firmware del prototipo (PlatformIO, Raspberry Pi Pico W o Pico + SIM7080G): GNSS, detección N0–N3, firma, cola sin red, LED, botones y simulacro. |
 | `simulador/` | Gemelo digital de los dispositivos y referencia del protocolo para el firmware. |
-| `docs/` | `protocolo.md` (contrato con el firmware) y `arquitectura.md` (decisiones y pendientes). |
+| `docs/` | `instalar-app.md`, `prototipo.md`, `protocolo.md` (contrato con el firmware) y `arquitectura.md`. |
+| `render.yaml` | Despliegue en Render con una dirección https (web, app y API juntas). |
 
 ## Comandos útiles
 
 ```bash
 npm test                  # pruebas de la API (firma, reenvío, cadena, unidad muda, formulario)
 npm run build             # compila la app para producción (app/dist)
+npm run tunel             # dirección https temporal para instalar la app en el celular
 npm run reiniciar-datos   # borra la base de datos y las llaves del simulador
 ```
 

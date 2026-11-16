@@ -23,7 +23,7 @@ export default function Monitor() {
           {atacadas.map(u => (
             <div key={u.id} className="franja-fila">
               <div>
-                <b>{u.unidad}</b> · {u.corredor}<br />
+                <b>{u.unidad}</b> · {u.corredor}{u.ultima?.simulacro && <span className="etiqueta-sim">SIMULACRO</span>}<br />
                 {u.estado === 'muda'
                   ? <>Sin señal {hace(u.segundos)} con motor encendido. Última posición válida: {coord(u.ultima?.lat, u.ultima?.lon)}</>
                   : <>El equipo reporta <b>{u.nivel_texto}</b> ({hace(u.segundos)}). GNSS {u.ultima?.sats ?? 0} satélites, C/N0 {u.ultima?.cn0 ?? '—'} dB-Hz</>}

@@ -57,3 +57,16 @@ footer { border-top:2px solid var(--k); padding:18px 0 30px; font-size:13px; col
 @media (max-width: 720px) {
   nav a:not(.btn) { display: none; }
 }
+.vivo { border: 2px solid var(--k); border-radius: 6px; padding: 18px; }
+.vivo.en-alerta { background: var(--k); color: var(--w); }
+.vivo.en-alerta .small { color: #ccc; }
+.vivo.apagado { border-style: dashed; color: var(--g); }
+.vivo-estado { display: flex; align-items: center; gap: 10px; font-size: 18px; flex-wrap: wrap; }
+.punto { width: 12px; height: 12px; border-radius: 50%; background: currentColor; }
+.vivo:not(.apagado) .punto { animation: pulso 1.4s infinite; }
+@keyframes pulso { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { .vivo .punto { animation: none; } }
+.etiqueta { border: 2px dashed currentColor; padding: 0 8px; font-size: 12px; font-weight: 700; }
+.vivo-datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0 10px; }
+.vivo-datos span { display: block; font-size: 13px; opacity: .75; }
+.vivo-datos b { font-size: 22px; }

@@ -1,0 +1,19 @@
+# Despliegue en Render (plan gratuito): https://render.com → New → Blueprint → elegir este repositorio.
+# Queda una sola dirección https:// con la página web en / , la app en /app y la API en /api.
+# Nota: en el plan gratuito el disco se borra en cada despliegue y el servicio se duerme tras 15 min
+# sin visitas (tarda ~1 min en despertar). Para el piloto, migrar la base de datos a Supabase.
+services:
+  - type: web
+    name: nervik
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/salud
+    envVars:
+      - key: NODE_VERSION
+        value: "22.13.1"
+      - key: CENTRAL_API_KEY
+        generateValue: true
+      - key: UMBRAL_MUDA_S
+        value: "45"

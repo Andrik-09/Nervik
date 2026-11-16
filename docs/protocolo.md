@@ -1,12 +1,12 @@
 # Protocolo dispositivo → API (v1)
 
-Este documento es el contrato entre el firmware del ESP32-S3 y la API. El simulador (`simulador/dispositivo.js`) ya lo implementa en JavaScript; el firmware en C debe producir exactamente lo mismo.
+Este documento es el contrato entre el firmware del dispositivo (RP2040, ver `firmware/`) y la API. El simulador (`simulador/dispositivo.js`) ya lo implementa en JavaScript; el firmware en C debe producir exactamente lo mismo.
 
 ## 1. Identidad del equipo
 
-En el primer arranque el equipo genera un par de llaves **ECDSA P-256 (secp256r1)** con mbedTLS (`mbedtls_ecp_gen_key` con `MBEDTLS_ECP_DP_SECP256R1`). La llave privada nunca sale del equipo: se guarda en NVS con cifrado de flash activado. La llave pública se exporta en PEM (SPKI) por el puerto serie y se imprime como código QR en la etiqueta junto con el número de serie `NVK-0001`.
+En el primer arranque el equipo genera un par de llaves **ECDSA P-256 (secp256r1)** con micro-ecc y el generador aleatorio del RP2040. La llave privada nunca sale del equipo. La llave pública se entrega como **código de alta** `NVK1:<serie>:<base64 de X||Y>` (y su QR), que la app convierte a PEM; también se imprime en PEM por el puerto serie.
 
-La central da de alta el equipo en la app (pantalla **Instalar**) con el número de serie, el número económico de la unidad y esa llave pública.
+La central da de alta el equipo en la app (pantalla **Instalar**) con el código de alta (o la llave PEM) y el número económico de la unidad.
 
 ## 2. Sobre que se envía
 
@@ -22,7 +22,7 @@ La central da de alta el equipo en la app (pantalla **Instalar**) con el número
 
 Se firma el **payload tal cual**, como bytes. El servidor verifica esos mismos bytes y después los interpreta como JSON, así que el firmware no necesita una serialización canónica: basta con no modificar el buffer entre firmar y codificar en base64.
 
-La firma es ECDSA con SHA-256. mbedTLS entrega la firma en DER; hay que convertirla a **r y s de 32 bytes cada uno, big-endian, concatenados** (64 bytes) antes del base64. Es el mismo formato que usa WebCrypto, lo que permite verificar el expediente en el navegador de la aseguradora.
+La firma es ECDSA con SHA-256, en formato **r y s de 32 bytes cada uno, big-endian, concatenados** (64 bytes), que es lo que entrega micro-ecc directamente. Es el mismo formato que usa WebCrypto, lo que permite verificar el expediente en el navegador de la aseguradora.
 
 ## 3. Payload de telemetría
 
@@ -80,4 +80,8 @@ Se envía cuando termina la interferencia (o cuando regresa la red, si el equipo
 | 409 | Contador repetido | Descartar el mensaje (ya llegó) |
 | 5xx / sin red | Falla temporal | Mantener en cola (W25Q128) y reintentar en orden |
 
-Los mensajes se guardan en un búfer circular en la flash W25Q128 y se envían **en el orden en que se firmaron**, porque la API exige contador creciente.
+Los mensajes se guardan en la flash (LittleFS en el prototipo; W25Q64 en la PCB) y se envían **en el orden en que se firmaron**, porque la API exige contador creciente.
+
+## 6. Campos adicionales del prototipo
+
+Telemetría: `fix` (el GNSS tiene posición), `bus` (llegan tramas J1939), `firmware` (versión) y `simulacro` (prueba sin inhibidor). Expediente: `simulacro` y `firmware`. La API devuelve `hora` en cada respuesta para que el equipo sincronice su reloj cuando no tiene GNSS.

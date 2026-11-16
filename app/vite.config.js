@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 // En desarrollo, /api se redirige a la API local (puerto 3000).
 export default defineConfig({
+  base: '/app/',  // la app vive en /app; la página web ocupa la raíz
   plugins: [react()],
   server: {
     port: 5173,
