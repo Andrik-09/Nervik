@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nervik — Evidencia cuando el jammer apaga todo</title>
+<meta name="description" content="Dispositivo para tractocamiones que detecta ataques con inhibidor sin internet y genera expedientes firmados para negociar con tu aseguradora.">
+<meta property="og:title" content="Nervik — Evidencia cuando el jammer apaga todo">
+<meta property="og:description" content="Detecta ataques con inhibidor dentro de la unidad y guarda evidencia firmada para tu aseguradora.">
+<link rel="icon" href="icono.svg" type="image/svg+xml">
+<link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+<header>
+  <div class="wrap cab">
+    <a class="logo" href="#">NERVIK</a>
+    <nav aria-label="Secciones">
+      <a href="#como">Cómo funciona</a>
+      <a href="#aseguradoras">Aseguradoras</a>
+      <a href="#precio">Precio</a>
+      <a href="#preguntas">Preguntas</a>
+      <a class="btn btn-chico" href="#apartar">Apartar unidad</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap hero">
+  <p class="eyebrow">Seguridad de carga para flotas de 20 a 200 tractocamiones</p>
+  <h1>Cuando el jammer apaga todo, Nervik sigue contando lo que pasó.</h1>
+  <p class="lead">Un equipo en la cabina detecta el ataque con inhibidor aunque no haya GPS ni red celular, avisa al operador y guarda un expediente firmado que tu aseguradora puede verificar. Menos discusión en el siniestro, mejores argumentos para tu prima.</p>
+  <a class="btn" href="#apartar">Apartar unidad piloto</a>
+  <a class="btn sec" href="#expediente">Ver un expediente</a>
+</div>
+
+<section id="como"><div class="wrap">
+  <h2>Cómo funciona</h2>
+  <div class="steps">
+    <div class="step"><b>1</b>Se conecta al conector verde de 9 pines del tractocamión y se fija con dos cinchos. Sin perforar, en menos de 10 minutos, con autoprueba en la app.</div>
+    <div class="step"><b>2</b>Su IA en el equipo reconoce la huella del inhibidor: la señal de todos los satélites cae a la vez y luego se pierde la red. Avisa en cabina y a tu central antes de quedar incomunicado.</div>
+    <div class="step"><b>3</b>Mientras dura el bloqueo sigue registrando: última posición válida, velocidad y paradas. Al regresar la señal envía el expediente firmado.</div>
+  </div>
+  <p class="no"><b>Lo que no hace:</b> no apaga el motor ni manda órdenes al camión. Solo escucha el bus del vehículo, para no poner en riesgo al operador.</p>
+</div></section>
+
+<section><div class="wrap">
+  <h2>Tu central lo ve en vivo</h2>
+  <p>La app del centro de control responde una sola pregunta: <b>¿alguna unidad está siendo atacada ahora?</b> Si una unidad deja de reportar con el motor encendido, se marca de inmediato con su última posición válida, aunque el equipo ya no pueda transmitir. Funciona en computadora y en celular.</p>
+  <div class="dos">
+    <div class="caja"><b>Monitor</b><br>Mapa de la flota, zonas de riesgo por tramo y alertas con sonido.</div>
+    <div class="caja"><b>Expedientes</b><br>Línea de tiempo de cada ataque, firma verificable y descarga para el ajustador.</div>
+    <div class="caja"><b>Instalación</b><br>Alta del equipo y autoprueba de energía, bus, satélites y red en 30 segundos.</div>
+  </div>
+</div></section>
+
+<section id="expediente"><div class="wrap">
+  <h2>Así se ve un expediente</h2>
+  <div class="exp">
+    <span class="stamp">EJEMPLO ILUSTRATIVO · DATOS FICTICIOS</span>
+    <div class="row"><span>Unidad</span><span>ECO-14 · Corredor Puebla–Oaxaca</span></div>
+    <div class="row"><span>02:14:07</span><span>Caída de señal en todos los satélites a la vez (no es túnel: la unidad iba a 82 km/h en tramo abierto)</span></div>
+    <div class="row"><span>02:14:20</span><span>Se pierde la red celular. Alerta en cabina encendida.</span></div>
+    <div class="row"><span>02:16:41</span><span>Parada no programada. Velocidad 0 km/h, motor encendido.</span></div>
+    <div class="row"><span>02:16:41</span><span>Última posición válida guardada antes del bloqueo.</span></div>
+    <div class="row"><span>02:31:55</span><span>Fin de la interferencia. Expediente enviado a la central.</span></div>
+    <div class="hash">Firma del expediente: 9f3c…a71e (cualquier cambio posterior invalida la firma)</div>
+  </div>
+</div></section>
+
+<section id="aseguradoras"><div class="wrap">
+  <h2>Para aseguradoras y brokers</h2>
+  <p>Hoy el riesgo de una flota se mide con el GPS del propio asegurado, que se queda ciego justo durante el ataque. Nervik entrega datos que no dependen de esa señal:</p>
+  <ul>
+    <li><b>Evidencia verificable:</b> cada expediente va firmado por el equipo (ECDSA P-256) y encadenado al anterior. Se verifica sin confiar en Nervik ni en el transportista.</li>
+    <li><b>Perfil de riesgo por flota:</b> frecuencia de ataques por tramo y horario, útil para condicionar o ajustar pólizas.</li>
+    <li><b>Programa con flotas aseguradas:</b> instalación en las unidades de tus clientes de mayor riesgo como parte de la colocación.</li>
+  </ul>
+  <a class="btn sec" href="#apartar" data-tipo="aseguradora">Hablar con el equipo</a>
+</div></section>
+
+<section id="precio"><div class="wrap">
+  <h2>Precio</h2>
+  <div class="price">
+    <div class="card"><div class="amount">$1,800</div><div class="unit">por unidad, una sola vez, instalado</div>
+      <ul><li>Dispositivo y cable para conector de 9 pines</li><li>Batería de respaldo de 72 horas</li></ul></div>
+    <div class="card"><div class="amount">$300</div><div class="unit">por unidad al mes</div>
+      <ul><li>App de la central de monitoreo</li><li>Conectividad celular incluida</li><li>Expedientes firmados de cada evento</li><li>Reporte de riesgo para tu aseguradora</li></ul></div>
+  </div>
+  <p class="small">Precios en pesos mexicanos, más IVA. Precio de lanzamiento para el lote piloto.</p>
+</div></section>
+
+<section id="preguntas"><div class="wrap">
+  <h2>Preguntas frecuentes</h2>
+  <details><summary>¿Reemplaza a mi GPS actual?</summary><p>No. Se suma a él. Tu GPS sigue rastreando; Nervik cubre el momento en que el GPS deja de funcionar por el inhibidor y deja constancia de lo que pasó.</p></details>
+  <details><summary>¿Puede apagar el camión?</summary><p>No, y es a propósito. El equipo solo escucha el bus del vehículo. Detener una unidad en carretera puede poner en riesgo al operador y genera responsabilidad legal.</p></details>
+  <details><summary>¿Qué pasa si arrancan el equipo?</summary><p>La desconexión queda registrada como evento y la batería de respaldo mantiene el registro. La forma en cuña y el cable con prensaestopa dificultan retirarlo rápido.</p></details>
+  <details><summary>¿Mi aseguradora va a aceptar el expediente?</summary><p>Estamos validando el formato con aseguradoras durante el piloto. El expediente se puede verificar de forma independiente con la llave pública del equipo.</p></details>
+  <details><summary>¿En qué unidades se instala?</summary><p>Tractocamiones con conector de diagnóstico de 9 pines (J1939), que es el estándar en clase 8. Si tu unidad tiene otro conector, avísanos en el formulario.</p></details>
+</div></section>
+
+<section id="apartar"><div class="wrap">
+  <h2>Apartar unidad piloto</h2>
+  <p>El lote piloto es de 10 unidades. Apartar no tiene costo; te llamamos para confirmar fecha de instalación.</p>
+  <form id="f" novalidate>
+    <fieldset class="tipo"><legend>Soy</legend>
+      <label><input type="radio" name="tipo" value="flota" checked> Flota / transportista</label>
+      <label><input type="radio" name="tipo" value="aseguradora"> Aseguradora</label>
+      <label><input type="radio" name="tipo" value="broker"> Broker</label>
+    </fieldset>
+    <div><label for="n">Nombre</label><input id="n" name="nombre" autocomplete="name" required></div>
+    <div><label for="e">Empresa</label><input id="e" name="empresa" autocomplete="organization" required></div>
+    <div id="campo-u"><label for="u">Unidades que quieres proteger</label>
+      <select id="u" name="unidades"><option>1</option><option>2</option><option>3 a 5</option><option>6 a 10</option><option>Más de 10</option></select></div>
+    <div><label for="c">Corredor principal</label><input id="c" name="corredor" placeholder="Ej. Puebla–Veracruz"></div>
+    <div><label for="t">Teléfono</label><input id="t" name="telefono" type="tel" autocomplete="tel" required></div>
+    <div><label for="m">Correo (opcional)</label><input id="m" name="correo" type="email" autocomplete="email"></div>
+    <div class="trampa" aria-hidden="true"><label for="w">No llenar</label><input id="w" name="sitio_web" tabindex="-1" autocomplete="off"></div>
+    <p id="err" class="aviso hidden" role="alert"></p>
+    <button class="btn" type="submit" id="enviar">Apartar mi unidad</button>
+  </form>
+  <div id="ok" class="ok hidden" role="status" aria-live="polite"></div>
+</div></section>
+</main>
+
+<footer><div class="wrap">Nervik · Proyecto de Ingeniería IV · Equipo 2 · IBERO Puebla</div></footer>
+
+<script src="config.js"></script>
+<script src="formulario.js"></script>
+</body>
+</html>

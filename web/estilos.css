@@ -1,0 +1,59 @@
+:root { --k:#000; --g:#555; --l:#e6e6e6; --w:#fff; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin:0; font-family: Arial, Helvetica, sans-serif; color:var(--k); background:var(--w); line-height:1.5; }
+a { color: inherit; }
+.wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+header { border-bottom: 2px solid var(--k); position: sticky; top: 0; background: var(--w); z-index: 10; }
+.cab { display:flex; justify-content:space-between; align-items:center; gap: 16px; padding-top:12px; padding-bottom:12px; }
+.logo { font-weight:900; letter-spacing:.18em; font-size:20px; text-decoration: none; }
+nav { display:flex; gap: 18px; align-items: center; font-size: 14px; }
+nav a { text-decoration: none; font-weight: 700; }
+.eyebrow { font-size: 13px; color: var(--g); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 10px; }
+.hero { padding: 52px 20px 40px; }
+h1 { font-size: clamp(30px, 5vw, 46px); line-height:1.1; margin:0 0 16px; }
+.lead { font-size: 18px; max-width: 700px; margin: 0 0 26px; }
+.btn { display:inline-block; background:var(--k); color:var(--w); border:2px solid var(--k); padding:14px 22px; font-size:16px; font-weight:700; cursor:pointer; border-radius:4px; text-decoration: none; font-family: inherit; }
+nav .btn-chico { padding: 8px 14px; font-size: 14px; color: var(--w); }
+.btn.sec { background:var(--w); color:var(--k); }
+.btn:disabled { opacity: .6; cursor: wait; }
+.btn:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline:3px solid var(--g); outline-offset:2px; }
+section { padding: 38px 0; border-top: 1px solid var(--l); scroll-margin-top: 60px; }
+h2 { font-size: 26px; margin: 0 0 18px; }
+.steps, .dos { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:16px; }
+.step, .caja { border:2px solid var(--k); border-radius:6px; padding:16px; }
+.step b { display:block; font-size:30px; line-height:1; margin-bottom:8px; }
+.dos { margin-top: 18px; }
+.no { border-left:6px solid var(--k); padding:6px 0 6px 14px; margin-top:20px; }
+.price { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap:16px; }
+.card { border:2px solid var(--k); border-radius:6px; padding:20px; }
+.amount { font-size:38px; font-weight:900; }
+.unit { color:var(--g); font-size:14px; }
+ul { padding-left: 20px; margin: 10px 0 18px; }
+li { margin-bottom: 6px; }
+.exp { border:2px dashed var(--k); border-radius:6px; padding:18px; font-family: "Courier New", monospace; font-size:14px; }
+.exp .stamp { display:inline-block; border:2px solid var(--k); padding:2px 8px; font-weight:700; font-family: Arial, sans-serif; font-size:12px; margin-bottom:10px; }
+.row { display:grid; grid-template-columns: 92px 1fr; gap:8px; padding:6px 0; border-bottom:1px solid var(--l); }
+.hash { word-break: break-all; color: var(--g); font-size:12px; margin-top:10px; }
+details { border-bottom: 1px solid var(--l); padding: 12px 0; }
+summary { font-weight: 700; cursor: pointer; }
+details p { margin: 8px 0 0; }
+#apartar { background: var(--l); }
+form { display:grid; gap:12px; max-width:540px; }
+label { font-weight:700; font-size:14px; }
+input, select { width:100%; padding:11px; font-size:16px; border:2px solid var(--k); border-radius:4px; background:var(--w); font-family: inherit; }
+.tipo { border: 0; padding: 0; margin: 0; display: flex; gap: 8px; flex-wrap: wrap; }
+.tipo legend { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.tipo label { display: flex; align-items: center; gap: 6px; border: 2px solid var(--k); border-radius: 4px; padding: 8px 12px; background: var(--w); font-weight: 400; cursor: pointer; }
+.tipo input { width: auto; margin: 0; }
+.tipo label:has(input:checked) { background: var(--k); color: var(--w); }
+.trampa { position: absolute; left: -9999px; }
+.aviso { border-left: 6px solid var(--k); background: var(--w); padding: 8px 12px; font-weight: 700; margin: 0; }
+.ok { border:2px solid var(--k); background:var(--w); padding:18px; border-radius:6px; max-width:540px; }
+.hidden { display:none !important; }
+.small { font-size:13px; color:var(--g); }
+footer { border-top:2px solid var(--k); padding:18px 0 30px; font-size:13px; color:var(--g); }
+@media (max-width: 720px) {
+  nav a:not(.btn) { display: none; }
+}

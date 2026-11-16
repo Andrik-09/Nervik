@@ -1,0 +1,20 @@
+{
+  "name": "@nervik/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API de Nervik: recibe telemetría y expedientes firmados de los dispositivos y alimenta la app del centro de control",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --disable-warning=ExperimentalWarning --watch src/server.js",
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=22.13"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  }
+}

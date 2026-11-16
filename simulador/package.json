@@ -1,0 +1,11 @@
+{
+  "name": "@nervik/simulador",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Gemelo digital de la flota: telemetría firmada y ataques con inhibidor simulados",
+  "scripts": {
+    "start": "node simular.js --historial",
+    "vivo": "node simular.js"
+  }
+}

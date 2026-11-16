@@ -1,0 +1,7 @@
+node_modules/
+dist/
+api/datos/
+simulador/.estado-simulador.json
+.env
+*.log
+.DS_Store
