@@ -30,6 +30,9 @@ const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '256kb' }));
 app.use(express.urlencoded({ extended: false }));
+// La app y la web pueden estar en otro dominio (p. ej. GitHub Pages) y hablar con esta API: se permite CORS.
+// La protección de la central es la llave (x-api-key), no el origen.
+app.use('/api', cors());
 
 // ---------- utilidades ----------
 const q = {
@@ -391,14 +394,8 @@ app.get('/api/v1/demo', cors(), (_req, res) => {
   });
 });
 
-// ---------- archivos estáticos: página web en / y app del centro de control en /app ----------
-const raiz = p => fileURLToPath(new URL(`../../${p}`, import.meta.url));
-const DIST_APP = raiz('app/dist');
-const WEB = raiz('web');
-if (existsSync(DIST_APP)) {
-  app.use('/app', express.static(DIST_APP, { index: 'index.html' }));
-  app.get(/^\/app(\/.*)?$/, (_req, res) => res.sendFile(`${DIST_APP}/index.html`)); // rutas internas de la app
-}
+// ---------- archivos estáticos: página web en / y app de monitoreo en /app (compilada en web/app) ----------
+const WEB = fileURLToPath(new URL('../../web', import.meta.url));
 if (existsSync(WEB)) app.use('/', express.static(WEB));
 
 app.use((err, _req, res, _next) => {

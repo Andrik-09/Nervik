@@ -3,7 +3,10 @@ import react from '@vitejs/plugin-react';
 
 // En desarrollo, /api se redirige a la API local (puerto 3000).
 export default defineConfig({
-  base: '/app/',  // la app vive en /app; la página web ocupa la raíz
+  // Rutas relativas: la misma compilación sirve en GitHub Pages (/Nervik/app/), en Render (/app/) o en local.
+  base: './',
+  // Se compila dentro de la página web, para publicarse junto con ella
+  build: { outDir: '../web/app', emptyOutDir: true },
   plugins: [react()],
   server: {
     port: 5173,

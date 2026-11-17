@@ -1,9 +1,11 @@
 # Nervik
 
+**Página web:** https://andrik-09.github.io/Nervik/ · **App:** https://andrik-09.github.io/Nervik/web/app/ (modo demostración sin servidor, o conectada a su servidor)
+
 Software de Nervik, en tres partes con propósitos distintos:
 
 - **Página web** (`/`): promoción y venta. Qué es Nervik, cómo funciona, la app, planes y precios, aseguradoras, preguntas, la bitácora del proyecto, canales de contacto, formulario «Contáctanos» y **tienda con carrito** (dispositivo + plan mensual).
-- **App de monitoreo** (`/app`): el centro de control en tiempo real. Todas las unidades en carretera, alertas, expedientes firmados, **pruebas y diagnóstico a distancia** e instalación de equipos. Se vincula con el prototipo.
+- **App de monitoreo** (`web/app`, se sirve en `/app`): el centro de control en tiempo real. Todas las unidades en carretera, alertas, expedientes firmados, **pruebas y diagnóstico a distancia** e instalación de equipos. Se vincula con el prototipo.
 - **Firmware del prototipo** (`firmware/`): Raspberry Pi Pico W con GNSS, que se conecta a la app.
 
 Además: la **API** que une todo, un **panel de ventas** para el equipo (`/admin`, pedidos y mensajes de la web) y un **simulador** de flota para trabajar sin hardware.
@@ -60,7 +62,7 @@ Para abrir la app desde el celular, conéctalo a la misma red Wi-Fi y entra a la
 
 ```bash
 npm test                  # pruebas de la API (firma, reenvío, cadena, unidad muda, formulario)
-npm run build             # compila la app para producción (app/dist)
+npm run build             # compila la app dentro de web/app (súbanla a GitHub para actualizar GitHub Pages)
 npm run tunel             # dirección https temporal para instalar la app en el celular
 npm run reiniciar-datos   # borra la base de datos y las llaves del simulador
 ```

@@ -38,30 +38,35 @@
 
   const api = window.NERVIK_API ?? ((location.port === '8080' || location.protocol === 'file:') ? 'http://localhost:3000' : '');
 
-  // Vista previa sin servidor (p. ej. publicada como página estática): no hay tienda ni formularios que guarden.
-  const vistaPrevia = !!window.NERVIK_VISTA_PREVIA;
+  // Vista previa: la página está publicada sin servidor (p. ej. GitHub Pages antes de Render),
+  // o el servidor no responde. El carrito y el contacto avisan en lugar de fingir que guardaron algo.
+  let vistaPrevia = !!window.NERVIK_VISTA_PREVIA;
+  function mostrarAvisoVistaPrevia() {
+    if (document.querySelector('.aviso-vista-previa') || !document.body) return;
+    const aviso = document.createElement('p');
+    aviso.className = 'aviso-vista-previa';
+    aviso.textContent = 'Vista previa: la tienda y el formulario de contacto se activan cuando conectemos el servidor. La app de monitoreo ya funciona en modo demostración.';
+    document.body.prepend(aviso);
+  }
 
   window.Nervik = {
     api,
-    vistaPrevia,
-    mensajeVistaPrevia: 'Esta es una vista previa de la página: los pedidos y mensajes se guardan cuando la página se publica con su servidor.',
+    get vistaPrevia() { return vistaPrevia; },
+    mensajeVistaPrevia: 'Esta página todavía está en vista previa: los pedidos y mensajes se guardarán cuando conectemos el servidor. Mientras tanto no se registró nada.',
     catalogo: CATALOGO_BASE,
     carrito: { leer, guardar, agregar: n => { const c = leer(); guardar({ unidades: Math.min(500, (c.unidades || 0) + n) }); } },
     cotizar,
     pesos: v => pesos.format(v),
     pesosCentavos: v => pesosCentavos.format(v),
     esc: s => String(s ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])),
-    listo: fetch(`${api}/api/v1/catalogo`).then(r => r.json()).then(c => { window.Nervik.catalogo = c; return c; }).catch(() => CATALOGO_BASE),
+    listo: vistaPrevia
+      ? Promise.resolve(CATALOGO_BASE)
+      : fetch(`${api}/api/v1/catalogo`).then(r => r.json()).then(c => { window.Nervik.catalogo = c; return c; })
+        .catch(() => { vistaPrevia = true; mostrarAvisoVistaPrevia(); return CATALOGO_BASE; }),
   };
   document.addEventListener('DOMContentLoaded', () => {
     pintarContador();
-    if (vistaPrevia) {
-      const aviso = document.createElement('p');
-      aviso.className = 'aviso-vista-previa';
-      aviso.textContent = 'Vista previa. La tienda, el formulario de contacto y la app funcionan cuando la página se publica con su servidor.';
-      document.body.prepend(aviso);
-      document.querySelectorAll('a[href="/app/"]').forEach(a => { a.href = 'index.html#app'; });
-    }
+    if (vistaPrevia) mostrarAvisoVistaPrevia();
     // menú en pantallas angostas
     const cab = document.querySelector('.cabecera'), b = document.querySelector('.abrir-menu');
     if (!cab || !b) return;

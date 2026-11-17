@@ -2,9 +2,23 @@
 
 La app del centro de control es una **app web instalable** (PWA): se instala desde el navegador, sin Play Store ni App Store, y queda con su ícono en el celular o en la computadora. Para que el navegador ofrezca instalarla, la app tiene que abrirse desde una dirección **https://** (o desde `localhost` en la propia computadora).
 
-## 1. Tener la app en línea (una sola vez)
+## 1. Dónde está la app
 
-### Opción A — Render, dirección fija (recomendada)
+### Ya publicada en GitHub Pages
+
+- Página web: **https://andrik-09.github.io/Nervik/** (manda a `/Nervik/web/`)
+- App: **https://andrik-09.github.io/Nervik/web/app/**
+
+GitHub Pages solo publica archivos; no corre el servidor. Por eso, al entrar a la app desde GitHub hay dos opciones:
+
+- **Ver demostración:** flota simulada de 6 tractocamiones en el navegador (mapa, alertas, expedientes con firma real, pruebas y diagnóstico). No necesita nada más.
+- **Entrar a mi central:** escriben la dirección del servidor (Render, cuando lo tengan) y la llave. Así la app de GitHub se conecta a los datos reales y al prototipo.
+
+Cada vez que se sube un cambio a `main` con la app compilada (`npm run build`), GitHub actualiza la página en uno o dos minutos.
+
+Cuando publiquen la API en Render, pongan su dirección en `web/config.js` (`NERVIK_API_PUBLICA`) para activar el carrito y el formulario de contacto de la página de GitHub.
+
+### Opción A — Render, dirección fija con servidor
 
 1. Entren a [render.com](https://render.com) con su cuenta de GitHub.
 2. **New → Blueprint** y elijan el repositorio `Andrik-09/Nervik`. Render lee `render.yaml` y crea el servicio solo.
@@ -16,7 +30,7 @@ La app del centro de control es una **app web instalable** (PWA): se instala des
 
 En el plan gratuito el servicio se duerme tras 15 minutos sin uso (tarda cerca de un minuto en despertar) y los datos se borran cuando se vuelve a desplegar. Para la demostración basta; para el piloto hay que pasar la base de datos a Supabase.
 
-### Opción B — Desde su computadora con un túnel (para una clase)
+### Opción B — Desde su computadora con un túnel (para una clase con el prototipo)
 
 ```bash
 npm install
@@ -30,16 +44,16 @@ Esa dirección https funciona mientras la computadora esté encendida y las dos 
 
 ### Android (Chrome)
 
-1. Abran `https://…/app` en **Chrome**.
-2. Entren con la llave de la central.
+1. Abran **https://andrik-09.github.io/Nervik/web/app/** en **Chrome** (o la dirección `/app` de Render).
+2. Toquen **Ver demostración**, o entren a su central con la dirección del servidor y la llave.
 3. Toquen el menú **⋮ → Instalar app** (en algunos teléfonos dice **Agregar a la pantalla principal**).
 4. Abran **Nervik** desde su ícono y toquen **Activar avisos** para recibir las alertas.
 
 ### iPhone (Safari)
 
-1. Abran `https://…/app` en **Safari** (en iPhone solo Safari permite instalar).
+1. Abran **https://andrik-09.github.io/Nervik/web/app/** en **Safari** (en iPhone solo Safari permite instalar).
 2. Toquen **Compartir** (cuadro con flecha) → **Agregar a pantalla de inicio** → **Agregar**.
-3. Abran **Nervik** desde el ícono y entren con la llave. Los avisos en iPhone requieren iOS 16.4 o posterior y que la app esté instalada.
+3. Abran **Nervik** desde el ícono y elijan **Ver demostración** o entren a su central. Los avisos en iPhone requieren iOS 16.4 o posterior y que la app esté instalada.
 
 ### Computadora (Chrome o Edge)
 

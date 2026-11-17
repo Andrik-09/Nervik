@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { api, llave } from '../api.js';
+import { api } from '../api.js';
 import { useFlota } from '../flota.jsx';
 import Mapa from '../componentes/Mapa.jsx';
 import Senal from '../componentes/Senal.jsx';
@@ -21,8 +21,7 @@ export default function Unidad() {
   }, [id, marcaTiempo, versionEventos]);
 
   async function descargarCsv() {
-    const r = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/unidades/${encodeURIComponent(id)}/telemetria.csv`, { headers: { 'x-api-key': llave() } });
-    const url = URL.createObjectURL(await r.blob());
+    const url = URL.createObjectURL(await api.csv(id));
     Object.assign(document.createElement('a'), { href: url, download: `telemetria-${id}.csv` }).click();
     URL.revokeObjectURL(url);
   }

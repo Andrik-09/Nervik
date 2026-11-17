@@ -150,3 +150,10 @@ dd { margin: 0; font-weight: 700; }
 @media (max-width: 860px) { .pruebas-col { grid-template-columns: 1fr; } }
 
 .pruebas li .p-nombre { margin-left: 0; flex: 1; font-size: 15px; color: inherit; }
+
+/* entrada: servidor o demostración */
+.entrar h2 { font-size: 18px; margin: 18px 0 4px; }
+.entrar-demo { margin-top: 28px; padding-top: 18px; border-top: 2px solid var(--l); display: grid; gap: 8px; justify-items: start; }
+.entrar-demo p { color: var(--g); margin: 0 0 6px; }
+.etiqueta-demo { border: 2px dashed var(--k); padding: 0 6px; margin-right: 8px; font-weight: 700; font-size: 11px; }
+.volver-web { margin-top: 28px; }
