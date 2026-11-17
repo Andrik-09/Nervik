@@ -1,91 +1,104 @@
-import { useState, useCallback } from 'react';
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { NavLink, Route, Routes, useLocation, useNavigate, Link } from 'react-router-dom';
 import { FlotaProvider, useFlota } from './flota.jsx';
-import { entrar, salir as cerrarSesion, sesionActiva, enDemo, servidor, probarServidor } from './api.js';
+import { salir as cerrarSesion, sesionActiva, enDemo } from './api.js';
+import { enAlerta, hace } from './formato.js';
+import Icono from './componentes/Iconos.jsx';
+import Entrar from './paginas/Entrar.jsx';
 import Monitor from './paginas/Monitor.jsx';
 import Unidad from './paginas/Unidad.jsx';
 import Expedientes from './paginas/Expedientes.jsx';
 import Expediente from './paginas/Expediente.jsx';
 import Instalar from './paginas/Instalar.jsx';
 import Pruebas from './paginas/Pruebas.jsx';
+import Ajustes from './paginas/Ajustes.jsx';
 
-function Entrar({ onListo }) {
-  // Si la app la sirve la propia API (Render o la computadora), el servidor es esta misma dirección.
-  const enGithub = location.hostname.endsWith('github.io');
-  const [url, setUrl] = useState(enGithub ? servidor() : '');
-  const [v, setV] = useState(import.meta.env.DEV ? 'dev-central' : '');
-  const [error, setError] = useState('');
-  const [probando, setProbando] = useState(false);
-
-  async function conectar(e) {
-    e.preventDefault(); setError(''); setProbando(true);
-    try {
-      await probarServidor(url.trim(), v.trim());
-      entrar({ modo: 'servidor', llave: v.trim(), servidor: url.trim() });
-      onListo();
-    } catch (x) { setError(x.message); }
-    setProbando(false);
-  }
-
-  return (
-    <main className="entrar">
-      <div className="logo grande">NERVIK</div>
-      <p>App de monitoreo para tu central</p>
-
-      <form className="formulario" onSubmit={conectar}>
-        <h2>Entrar a mi central</h2>
-        {enGithub && (
-          <label>Dirección del servidor
-            <input type="url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://nervik-xxxx.onrender.com" required />
-          </label>
-        )}
-        <label>Llave de acceso de la central<input type="password" value={v} onChange={e => setV(e.target.value)} required autoFocus={!enGithub} /></label>
-        {error && <p className="error" role="alert">{error}</p>}
-        <button className="btn" type="submit" disabled={probando}>{probando ? 'Conectando…' : 'Entrar'}</button>
-      </form>
-
-      <section className="entrar-demo">
-        <h2>¿Aún no tienes servidor?</h2>
-        <p>Prueba la app con una flota simulada de 6 tractocamiones en tu navegador: mapa, alertas, expedientes firmados, pruebas y diagnóstico.</p>
-        <button className="btn btn-sec" onClick={() => { entrar({ modo: 'demo' }); onListo(); }}>Ver demostración</button>
-      </section>
-      <p className="nota volver-web"><a href="../">Volver a la página de Nervik</a></p>
-    </main>
-  );
-}
+const SECCIONES = [
+  ['/', 'Monitor', 'monitor'],
+  ['/expedientes', 'Expedientes', 'expedientes'],
+  ['/pruebas', 'Pruebas', 'pruebas'],
+  ['/instalar', 'Instalar', 'instalar'],
+  ['/ajustes', 'Ajustes', 'ajustes'],
+];
 
 function Aviso() {
   const { aviso, cerrarAviso } = useFlota();
+  const navegar = useNavigate();
+  useEffect(() => {
+    if (!aviso) return;
+    const t = setTimeout(cerrarAviso, aviso.tipo === 'alerta' ? 9000 : 5000);
+    return () => clearTimeout(t);
+  }, [aviso, cerrarAviso]);
   if (!aviso) return null;
   return (
-    <div className="aviso" role="status" aria-live="assertive">
-      {aviso.texto}<button onClick={cerrarAviso} aria-label="Cerrar aviso">×</button>
+    <div key={aviso.t} className={`aviso aviso-${aviso.tipo}`} role="status" aria-live="assertive">
+      <Icono n={aviso.tipo === 'alerta' ? 'alerta' : aviso.tipo === 'listo' ? 'escudo' : 'campana'} />
+      <span>{aviso.texto}</span>
+      {aviso.enlace && <button className="aviso-ir" onClick={() => { navegar(aviso.enlace); cerrarAviso(); }}>Ver</button>}
+      <button className="aviso-cerrar" onClick={cerrarAviso} aria-label="Cerrar aviso"><Icono n="cerrar" tam={18} /></button>
     </div>
   );
 }
 
-function Cabecera({ onSalir }) {
-  const { conectado, unidades } = useFlota();
-  const [permiso, setPermiso] = useState(() => { try { return Notification.permission; } catch { return 'denied'; } });
+// Franja de alerta visible en todas las secciones (menos en el monitor, que ya la muestra en grande)
+function AlertaGlobal() {
+  const { unidades } = useFlota();
+  const { pathname } = useLocation();
+  const atacadas = unidades.filter(enAlerta);
+  if (!atacadas.length || pathname === '/' || atacadas.some(u => pathname === `/unidad/${u.id}`)) return null;
+  const u = atacadas[0];
   return (
-    <header className="cab no-imprimir">
-      <div className="cab-sup">
-        <span className="logo">NERVIK</span>
-        <span className={conectado ? 'en-linea' : 'en-linea fuera'}>
-          {enDemo() && <span className="etiqueta-demo">DEMOSTRACIÓN</span>}
-          {conectado ? '● En vivo' : '○ Reconectando…'} · {unidades.length} unidades
-        </span>
-      </div>
-      <nav>
-        <NavLink to="/" end>Monitor</NavLink>
-        <NavLink to="/expedientes">Expedientes</NavLink>
-        <NavLink to="/pruebas">Pruebas</NavLink>
-        <NavLink to="/instalar">Instalar</NavLink>
-        {permiso === 'default' && <button className="enlace" onClick={() => Notification.requestPermission().then(setPermiso)}>Activar avisos</button>}
-        <button className="enlace" onClick={onSalir}>Salir</button>
-      </nav>
-    </header>
+    <Link className="alerta-global" to={`/unidad/${u.id}`}>
+      <span className="latido" />
+      <b>{atacadas.length > 1 ? `${atacadas.length} unidades con posible ataque` : `${u.unidad}: posible ataque`}</b>
+      <span className="alerta-global-det">{u.estado === 'muda' ? `sin señal ${hace(u.segundos)}` : u.nivel_texto}</span>
+      <Icono n="flecha" tam={18} />
+    </Link>
   );
+}
+
+function Navegacion() {
+  const { conectado, unidades } = useFlota();
+  const atacadas = unidades.filter(enAlerta).length;
+  return (
+    <>
+      <aside className="lateral no-imprimir">
+        <Link to="/" className="logo">NERVIK</Link>
+        <p className="lateral-sub">Centro de control</p>
+        <nav className="lateral-nav">
+          {SECCIONES.map(([ruta, t, ic]) => (
+            <NavLink key={ruta} to={ruta} end={ruta === '/'}>
+              <Icono n={ic} /> <span>{t}</span>
+              {ruta === '/' && atacadas > 0 && <em className="insignia">{atacadas}</em>}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="lateral-pie">
+          {enDemo() && <span className="etiqueta-demo">Demostración</span>}
+          <span className={conectado ? 'en-linea' : 'en-linea fuera'}><i />{conectado ? 'En vivo' : 'Reconectando…'} · {unidades.length} unidades</span>
+          <a className="lateral-web" href="../">Página de Nervik</a>
+        </div>
+      </aside>
+      <header className="barra-movil no-imprimir">
+        <Link to="/" className="logo">NERVIK</Link>
+        <span className={conectado ? 'en-linea' : 'en-linea fuera'}><i />{enDemo() ? 'Demo · ' : ''}{conectado ? 'En vivo' : 'Reconectando'}</span>
+      </header>
+      <nav className="pestanas-movil no-imprimir" aria-label="Secciones">
+        {SECCIONES.map(([ruta, t, ic]) => (
+          <NavLink key={ruta} to={ruta} end={ruta === '/'}>
+            <span className="pm-icono"><Icono n={ic} />{ruta === '/' && atacadas > 0 && <em className="insignia">{atacadas}</em>}</span>
+            <span>{t}</span>
+          </NavLink>
+        ))}
+      </nav>
+    </>
+  );
+}
+
+function ArribaAlCambiar() {
+  const { pathname } = useLocation();
+  useEffect(() => { document.querySelector('.contenido')?.scrollTo?.(0, 0); window.scrollTo(0, 0); }, [pathname]);
+  return null;
 }
 
 export default function App() {
@@ -94,19 +107,24 @@ export default function App() {
   if (!dentro) return <Entrar onListo={() => setDentro(true)} />;
   return (
     <FlotaProvider onNoAutorizado={salir}>
-      <Cabecera onSalir={salir} />
-      <Aviso />
-      <main className="contenido">
-        <Routes>
-          <Route path="/" element={<Monitor />} />
-          <Route path="/unidad/:id" element={<Unidad />} />
-          <Route path="/expedientes" element={<Expedientes />} />
-          <Route path="/expedientes/:id" element={<Expediente />} />
-          <Route path="/instalar" element={<Instalar />} />
-          <Route path="/pruebas" element={<Pruebas />} />
-          <Route path="*" element={<p>No existe esta página.</p>} />
-        </Routes>
-      </main>
+      <div className="marco-app">
+        <Navegacion />
+        <main className="contenido">
+          <ArribaAlCambiar />
+          <AlertaGlobal />
+          <Routes>
+            <Route path="/" element={<Monitor />} />
+            <Route path="/unidad/:id" element={<Unidad />} />
+            <Route path="/expedientes" element={<Expedientes />} />
+            <Route path="/expedientes/:id" element={<Expediente />} />
+            <Route path="/instalar" element={<Instalar />} />
+            <Route path="/pruebas" element={<Pruebas />} />
+            <Route path="/ajustes" element={<Ajustes onSalir={salir} />} />
+            <Route path="*" element={<div className="vacio-sel">No existe esta sección. <Link to="/">Volver al monitor</Link></div>} />
+          </Routes>
+        </main>
+        <Aviso />
+      </div>
     </FlotaProvider>
   );
 }

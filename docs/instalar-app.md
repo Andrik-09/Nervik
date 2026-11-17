@@ -11,7 +11,7 @@ La app del centro de control es una **app web instalable** (PWA): se instala des
 
 GitHub Pages solo publica archivos; no corre el servidor. Por eso, al entrar a la app desde GitHub hay dos opciones:
 
-- **Ver demostración:** flota simulada de 6 tractocamiones en el navegador (mapa, alertas, expedientes con firma real, pruebas y diagnóstico). No necesita nada más.
+- **Entrar a la demostración:** flota simulada de 6 tractocamiones en el navegador (mapa, alertas, protocolo de respuesta, expedientes con firma real, pruebas y diagnóstico). El botón «Lanzar ataque de prueba» enciende un inhibidor simulado cuando quieras. No necesita nada más.
 - **Entrar a mi central:** escriben la dirección del servidor (Render, cuando lo tengan) y la llave. Así la app de GitHub se conecta a los datos reales y al prototipo.
 
 Cada vez que se sube un cambio a `main` con la app compilada (`npm run build`), GitHub actualiza la página en uno o dos minutos.
@@ -45,15 +45,15 @@ Esa dirección https funciona mientras la computadora esté encendida y las dos 
 ### Android (Chrome)
 
 1. Abran **https://andrik-09.github.io/Nervik/web/app/** en **Chrome** (o la dirección `/app` de Render).
-2. Toquen **Ver demostración**, o entren a su central con la dirección del servidor y la llave.
+2. Toquen **Entrar a la demostración**, o entren a su central con la dirección del servidor y la llave.
 3. Toquen el menú **⋮ → Instalar app** (en algunos teléfonos dice **Agregar a la pantalla principal**).
-4. Abran **Nervik** desde su ícono y toquen **Activar avisos** para recibir las alertas.
+4. Abran **Nervik** desde su ícono y en **Ajustes** activen las notificaciones para recibir las alertas (ahí también está el botón «Instalar app»).
 
 ### iPhone (Safari)
 
 1. Abran **https://andrik-09.github.io/Nervik/web/app/** en **Safari** (en iPhone solo Safari permite instalar).
 2. Toquen **Compartir** (cuadro con flecha) → **Agregar a pantalla de inicio** → **Agregar**.
-3. Abran **Nervik** desde el ícono y elijan **Ver demostración** o entren a su central. Los avisos en iPhone requieren iOS 16.4 o posterior y que la app esté instalada.
+3. Abran **Nervik** desde el ícono y elijan **Entrar a la demostración** o entren a su central. Los avisos en iPhone requieren iOS 16.4 o posterior y que la app esté instalada.
 
 ### Computadora (Chrome o Edge)
 

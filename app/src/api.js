@@ -58,6 +58,7 @@ const real = {
     const r = await fetch(`${servidor()}/api/v1/unidades/${encodeURIComponent(id)}/telemetria.csv`, { headers: { 'x-api-key': llave() } });
     return r.blob();
   },
+  atacar: async () => { throw new Error('Solo disponible en la demostración'); },
   stream: () => new EventSource(`${servidor()}/api/v1/stream?key=${encodeURIComponent(llave())}`),
 };
 

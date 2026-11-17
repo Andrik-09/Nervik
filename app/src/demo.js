@@ -277,6 +277,16 @@ export const demo = {
     M.emitir('comando', { dispositivo_id: id, ids: [c.id], estado: 'pendiente' });
     return { ...c };
   },
+  // Solo en la demostración: lanza un ataque con inhibidor ahora mismo sobre una unidad en ruta
+  atacar: async id => {
+    const M = await m();
+    if (M.equipos.some(e => e.ataque)) throw Object.assign(new Error('Ya hay un ataque en curso'), { status: 409 });
+    const libres = M.equipos.filter(e => !e.fijo);
+    const e = (id && libres.find(x => x.id === id)) || libres[Math.floor(Math.random() * libres.length)];
+    e.ataque = { t0: Date.now(), linea: [] };
+    M.ultimoAtaque = Date.now();
+    return { id: e.id, unidad: e.unidad };
+  },
   alta: async datos => {
     const M = await m();
     const codigo = String(datos.codigo || '');

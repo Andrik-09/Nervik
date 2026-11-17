@@ -1,7 +1,7 @@
 // Service worker de la app Nervik.
 // Guarda la "cáscara" de la app para abrirla rápido; los datos (/api) siempre van a la red,
 // porque una alerta vieja mostrada como actual sería peor que ninguna.
-const CACHE = 'nervik-app-v1';
+const CACHE = 'nervik-app-v2';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => {

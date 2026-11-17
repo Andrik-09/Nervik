@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import Icono from '../componentes/Iconos.jsx';
 
 const PRUEBAS = [
   ['energia', 'Energía del vehículo', t => t.alimentacion, v => v >= 11, v => `${v} V`],
@@ -88,19 +89,22 @@ export default function Instalar() {
 
   return (
     <>
-      <h1>Instalar un dispositivo</h1>
+      <header className="pagina-cab"><div><h1>Instalar un dispositivo</h1><p className="pagina-sub">Tres pasos y menos de diez minutos por unidad. La prueba final confirma que el equipo ya protege el camión.</p></div></header>
       <ol className="pasos-inst">
-        {['Escanear', 'Conectar', 'Prueba automática'].map((t, i) => (
-          <li key={t} className={paso === i + 1 && !(i === 2 && listo) ? 'activo' : paso > i + 1 || (i === 2 && listo) ? 'hecho' : ''}>Paso {i + 1} de 3 · {t}</li>
+        {[['Escanear', 'QR de la caja'], ['Conectar', 'Puerto de 9 pines'], ['Probar', 'Prueba automática']].map(([t, d], i) => (
+          <li key={t} className={paso === i + 1 && !(i === 2 && listo) ? 'activo' : paso > i + 1 || (i === 2 && listo) ? 'hecho' : ''}>
+            <i>{paso > i + 1 || (i === 2 && listo) ? <Icono n="check" tam={16} /> : i + 1}</i><span><b>{t}</b><small>{d}</small></span>
+          </li>
         ))}
       </ol>
+      <div className="tarjeta-seccion instalar-cuerpo">
 
       {paso === 1 && (
         <form className="formulario" onSubmit={darDeAlta}>
           <p>Escanea el código QR de la caja del equipo. En el prototipo, el QR y el código aparecen en el monitor serie al encender la Pico.</p>
           {camara
             ? <div className="camara"><video ref={video} muted playsInline /><button type="button" className="btn btn-sec" onClick={() => setCamara(false)}>Cerrar cámara</button></div>
-            : <button type="button" className="btn btn-sec" onClick={() => setCamara(true)}>Escanear QR con la cámara</button>}
+            : <button type="button" className="btn btn-sec boton-camara" onClick={() => setCamara(true)}><Icono n="instalar" tam={20} />Escanear QR con la cámara</button>}
           {aviso && <p className="nota">{aviso}</p>}
           <label>Código de alta (NVK1:…) o llave pública PEM
             <textarea rows={3} value={f.codigo} onChange={cambiar('codigo')} placeholder="NVK1:NVK-P001:BHk3…" required /></label>
@@ -110,7 +114,7 @@ export default function Instalar() {
           <label>Unidad (número económico)<input value={f.unidad} onChange={cambiar('unidad')} placeholder="TR-0417" required /></label>
           <label>Corredor principal<input value={f.corredor} onChange={cambiar('corredor')} placeholder="Puebla–Veracruz" /></label>
           {error && <p className="error" role="alert">{error}</p>}
-          <button className="btn" type="submit">Siguiente</button>
+          <button className="btn btn-ambar" type="submit">Siguiente <Icono n="flecha" tam={16} /></button>
         </form>
       )}
 
@@ -130,22 +134,24 @@ export default function Instalar() {
           <p><b>Conecta el cable al puerto de 9 pines</b> (conector verde redondo bajo el tablero). En el prototipo de banco, conecta la Pico a la corriente.</p>
           <p><b>Fija la cuña con los 2 cinchos</b>, con la cara inclinada hacia el piso de la cabina.</p>
           <p className="nota">Equipo {id}. Al terminar deben encender las luces de energía y comunicación.</p>
-          <button className="btn" onClick={() => setPaso(3)}>Ya está conectado</button>
+          <button className="btn btn-ambar" onClick={() => setPaso(3)}>Ya está conectado <Icono n="flecha" tam={16} /></button>
         </section>
       )}
 
       {paso === 3 && (
         <section className="formulario">
           <p>{listo ? `Prueba superada en ${seg} s. El equipo ${id} ya protege la unidad ${f.unidad}.` : `Prueba automática… ${seg} s`}</p>
-          <ul className="pruebas">
+          <div className="prueba-reloj"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" /><circle cx="24" cy="24" r="20" className="arco" style={{ strokeDasharray: `${Math.min(1, seg / 30) * 125.7} 125.7` }} /></svg><b>{listo ? <Icono n="check" tam={22} /> : `${seg}s`}</b></div>
+          <ul className="pruebas-rejilla">
             {resultados.map(r => (
-              <li key={r.k} className={r.estado}><b>{r.estado === 'ok' ? '✓' : r.estado === 'falla' ? '✗' : r.estado === 'na' ? '–' : '…'}</b> {r.nombre} <span>{r.txt}</span></li>
+              <li key={r.k} className={r.estado === 'espera' ? 'espera' : r.estado}><span>{r.nombre}</span><em>{r.txt}</em><i className="estado-prueba">{r.estado === 'ok' ? <Icono n="check" tam={14} /> : r.estado === 'falla' ? <Icono n="cerrar" tam={14} /> : r.estado === 'na' ? '–' : '…'}</i></li>
             ))}
           </ul>
           {!listo && seg > 45 && <p className="error">Lleva más de 45 s. Revisa que el LED de comunicación esté fijo y que la antena GNSS tenga vista al cielo (junto a una ventana sirve).</p>}
-          {listo && <Link className="btn" to={`/unidad/${id}`}>Terminar</Link>}
+          {listo && <Link className="btn btn-ambar" to={`/unidad/${id}`}>Ver la unidad <Icono n="flecha" tam={16} /></Link>}
         </section>
       )}
+      </div>
     </>
   );
 }

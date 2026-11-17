@@ -4,20 +4,21 @@ import { useEffect, useState } from 'react';
 import { api } from '../api.js';
 import { useFlota } from '../flota.jsx';
 import { fechaHora } from '../formato.js';
+import Icono from './Iconos.jsx';
 
 export const PRUEBAS = {
-  receptor_gnss: 'Receptor GNSS',
-  posicion_gnss: 'Posición GNSS',
-  red: 'Red celular',
-  bus_j1939: 'Bus J1939 (solo escucha)',
-  imu: 'Sensor de movimiento',
-  alimentacion: 'Energía del vehículo',
-  bateria: 'Batería de respaldo',
-  memoria: 'Memoria y mensajes en cola',
-  firma: 'Firma digital',
-  reloj: 'Reloj',
-  luces_y_buzzer: 'Luces y buzzer',
-  deteccion: 'Detección de inhibidor',
+  receptor_gnss: ['Receptor GNSS', 'satelite'],
+  posicion_gnss: ['Posición GNSS', 'monitor'],
+  red: ['Red celular', 'senal'],
+  bus_j1939: ['Bus J1939 (solo escucha)', 'camion'],
+  imu: ['Sensor de movimiento', 'velocidad'],
+  alimentacion: ['Energía del vehículo', 'rayo'],
+  bateria: ['Batería de respaldo', 'bateria'],
+  memoria: ['Memoria y cola', 'servidor'],
+  firma: ['Firma digital', 'candado'],
+  reloj: ['Reloj', 'reloj'],
+  luces_y_buzzer: ['Luces y buzzer', 'campana'],
+  deteccion: ['Detección de inhibidor', 'escudo'],
 };
 
 export function resumenDiagnostico(c) {
@@ -26,7 +27,7 @@ export function resumenDiagnostico(c) {
   if (c.estado === 'entregado') return 'El equipo está haciendo las pruebas';
   const p = c.resultado?.pruebas || [];
   const fallas = p.filter(x => x.ok === false).length;
-  return fallas ? `${fallas} prueba${fallas > 1 ? 's' : ''} con falla` : `Todo correcto (${p.filter(x => x.ok).length} pruebas)`;
+  return fallas ? `${fallas} prueba${fallas > 1 ? 's' : ''} con falla` : `Todo correcto, ${p.filter(x => x.ok).length} pruebas`;
 }
 
 export default function Diagnostico({ id, unidad }) {
@@ -34,12 +35,12 @@ export default function Diagnostico({ id, unidad }) {
   const [lista, setLista] = useState(null);
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState('');
+  const [confirmar, setConfirmar] = useState(false);
 
   useEffect(() => { api.comandos(id).then(setLista).catch(e => setError(e.message)); }, [id, versionComandos]);
 
   async function pedir(tipo) {
-    if (tipo === 'simulacro' && !window.confirm(`La prueba de alerta hace que ${unidad} simule un ataque durante unos 2 minutos: se verá en el monitor como alerta marcada «SIMULACRO» y el equipo dejará de transmitir un momento. ¿Iniciarla?`)) return;
-    setEnviando(tipo); setError('');
+    setConfirmar(false); setEnviando(tipo); setError('');
     try { await api.pedirComando(id, tipo); setLista(await api.comandos(id)); } catch (e) { setError(e.message); }
     setEnviando('');
   }
@@ -47,32 +48,63 @@ export default function Diagnostico({ id, unidad }) {
   const diag = lista?.find(c => c.tipo === 'diagnostico');
   const enCurso = diag && diag.estado !== 'completado';
   const pruebas = diag?.estado === 'completado' ? diag.resultado?.pruebas || [] : [];
+  const fallas = pruebas.filter(p => p.ok === false).length;
 
   return (
-    <section className="diagnostico">
-      <div className="diag-cab">
+    <section className="tarjeta-seccion diagnostico">
+      <div className="seccion-cab">
         <div>
-          <h2>Pruebas del equipo</h2>
+          <h2>Pruebas del equipo {unidad}</h2>
           <p className="nota">{diag ? `${resumenDiagnostico(diag)}. Pedido ${fechaHora(diag.creado)}${diag.completado ? `, respondido ${fechaHora(diag.completado)}` : ''}.` : 'Aún no se ha hecho un diagnóstico de este equipo.'}</p>
         </div>
         <div className="acciones">
-          <button className="btn" onClick={() => pedir('diagnostico')} disabled={!!enviando || enCurso}>{enCurso ? 'Diagnóstico en curso…' : 'Hacer diagnóstico'}</button>
-          <button className="btn btn-sec" onClick={() => pedir('simulacro')} disabled={!!enviando}>Prueba de alerta</button>
+          <button className="btn btn-ambar" onClick={() => pedir('diagnostico')} disabled={!!enviando || enCurso}><Icono n="pruebas" tam={17} />{enCurso ? 'Diagnóstico en curso…' : 'Hacer diagnóstico'}</button>
+          <button className="btn btn-sec" onClick={() => setConfirmar(true)} disabled={!!enviando}><Icono n="campana" tam={17} />Prueba de alerta</button>
         </div>
       </div>
+
+      {confirmar && (
+        <div className="confirmar" role="dialog" aria-label="Confirmar prueba de alerta">
+          <Icono n="alerta" tam={22} />
+          <p><b>{unidad} simulará un ataque durante unos 2 minutos.</b> Se verá en el monitor como alerta marcada «Simulacro» y el equipo dejará de transmitir un momento.</p>
+          <div className="acciones">
+            <button className="btn btn-ambar" onClick={() => pedir('simulacro')}>Iniciar prueba</button>
+            <button className="btn btn-sec" onClick={() => setConfirmar(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
       {error && <p className="error" role="alert">{error}</p>}
-      {pruebas.length > 0 && (
-        <ul className="pruebas">
-          {pruebas.map(p => (
-            <li key={p.prueba} className={p.ok === true ? 'ok' : p.ok === false ? 'falla' : 'na'}>
-              <b>{p.ok === true ? '✓' : p.ok === false ? '✗' : '–'}</b>
-              <span className="p-nombre">{PRUEBAS[p.prueba] || p.prueba}{p.ok === false && p.detalle ? <small>{p.detalle}</small> : null}</span>
-              <span>{p.valor}</span>
-            </li>
+
+      {enCurso && (
+        <ul className="pruebas-rejilla escaneando" aria-label="Pruebas en curso">
+          {Object.entries(PRUEBAS).map(([k, [t, ic]], i) => (
+            <li key={k} style={{ animationDelay: `${i * 120}ms` }}><Icono n={ic} tam={18} /><span>{t}</span><em>esperando…</em></li>
           ))}
         </ul>
       )}
-      {diag?.estado === 'completado' && <p className="nota">Resultado firmado por el equipo {id}{diag.resultado?.firmware ? `, firmware ${diag.resultado.firmware}` : ''}.</p>}
+
+      {pruebas.length > 0 && (
+        <>
+          <div className={`diag-resumen${fallas ? ' falla' : ''}`}>
+            <Icono n={fallas ? 'alerta' : 'escudo'} tam={24} />
+            <b>{fallas ? `${fallas} prueba${fallas > 1 ? 's' : ''} por revisar` : 'Equipo en perfecto estado'}</b>
+            <span>{pruebas.filter(p => p.ok).length} de {pruebas.length} correctas · resultado firmado por {id}</span>
+          </div>
+          <ul className="pruebas-rejilla">
+            {pruebas.map((p, i) => {
+              const [t, ic] = PRUEBAS[p.prueba] || [p.prueba, 'pruebas'];
+              return (
+                <li key={p.prueba} className={p.ok === true ? 'ok' : p.ok === false ? 'falla' : 'na'} style={{ animationDelay: `${i * 70}ms` }}>
+                  <Icono n={ic} tam={18} />
+                  <span>{t}{p.ok === false && p.detalle ? <small>{p.detalle}</small> : null}</span>
+                  <em>{p.valor}</em>
+                  <i className="estado-prueba">{p.ok === true ? <Icono n="check" tam={14} /> : p.ok === false ? <Icono n="cerrar" tam={14} /> : '–'}</i>
+                </li>
+              );
+            })}
+          </ul>
+        </>
+      )}
     </section>
   );
 }
