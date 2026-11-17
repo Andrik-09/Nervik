@@ -7,20 +7,22 @@
 <meta name="description" content="Nervik detecta dentro del tractocamión los ataques con inhibidor de señal, avisa a tu central y guarda un expediente firmado para tu aseguradora. Dispositivo de $1,800 y plan de $300 al mes por unidad.">
 <meta property="og:title" content="Nervik: evidencia cuando el jammer apaga todo">
 <meta property="og:description" content="Detecta ataques con inhibidor dentro de la unidad, avisa a tu central y guarda evidencia firmada.">
+<meta property="og:image" content="img/dispositivo.png">
 <meta name="theme-color" content="#000000">
 <link rel="icon" href="icono.svg" type="image/svg+xml">
 <link rel="preload" href="fuentes/barlow-condensed-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="modulepreload" href="js/dispositivo3d.js">
 <link rel="stylesheet" href="estilos.css">
 </head>
-<body>
+<body class="inicio">
 <a class="saltar" href="#contenido">Saltar al contenido</a>
 
-<header class="cabecera">
+<header class="cabecera sobre-portada">
   <div class="marco cabecera-fila">
     <a class="marca" href="#">NERVIK</a>
     <button class="abrir-menu" type="button" aria-expanded="false" aria-controls="menu">Menú</button>
     <nav class="menu" id="menu" aria-label="Secciones">
-      <a href="#que-es">Qué es</a>
+      <a href="#por-que">Por qué Nervik</a>
       <a href="#como-funciona">Cómo funciona</a>
       <a href="#app">La app</a>
       <a href="#planes">Planes</a>
@@ -37,124 +39,167 @@
 
 <main id="contenido">
 
-<section class="portada">
+<!-- ================= PORTADA ================= -->
+<section class="portada" aria-labelledby="titulo-portada">
   <div class="marco portada-rejilla">
     <div class="portada-texto">
-      <h1>Cuando el jammer apaga todo, Nervik sigue contando lo que pasó.</h1>
-      <p class="entrada">Un equipo dentro de la cabina reconoce el ataque con inhibidor aunque no haya GPS ni red celular, avisa a tu central y guarda un expediente firmado que tu aseguradora puede comprobar.</p>
+      <h1 id="titulo-portada">Cuando el jammer apaga todo, Nervik sigue contando lo que pasó.</h1>
+      <p class="entrada">Un equipo en la cabina reconoce el ataque con inhibidor aunque no haya GPS ni red celular, avisa a tu central y guarda un expediente firmado que tu aseguradora puede comprobar.</p>
       <div class="botones">
-        <a class="boton boton-claro" href="#planes">Ver planes y precios</a>
-        <a class="boton boton-contorno" href="#como-funciona">Cómo funciona</a>
+        <a class="boton boton-ambar" href="#planes">Ver planes y precios</a>
+        <a class="boton boton-contorno" href="app/">Probar la app</a>
       </div>
     </div>
 
-    <figure class="senal" id="senal" aria-labelledby="senal-titulo">
-      <figcaption id="senal-titulo">Calidad de señal de cada satélite durante un ataque</figcaption>
-      <div class="barras" aria-hidden="true">
-        <div class="barra" style="--alto:.86"><i></i><span>G05</span></div>
-        <div class="barra" style="--alto:.92"><i></i><span>G12</span></div>
-        <div class="barra" style="--alto:.78"><i></i><span>G19</span></div>
-        <div class="barra" style="--alto:.88"><i></i><span>G24</span></div>
-        <div class="barra" style="--alto:.81"><i></i><span>R07</span></div>
-        <div class="barra" style="--alto:.9"><i></i><span>E11</span></div>
-        <div class="barra" style="--alto:.84"><i></i><span>B23</span></div>
-        <div class="barra" style="--alto:.76"><i></i><span>G29</span></div>
+    <div class="escenario" id="escenario">
+      <div class="onda" aria-hidden="true"></div>
+      <div class="lienzo-3d" id="lienzo-3d">
+        <img class="respaldo-3d" src="img/dispositivo.png" alt="Dispositivo Nervik: una cuña negra de 9 por 6 centímetros con tres luces al frente y un cable al conector de 9 pines" width="900" height="720">
       </div>
-      <ol class="registro">
-        <li><time>02:14:07</time> La señal cae en todos los satélites a la vez, con la unidad a 82 km/h en tramo abierto.</li>
-        <li><time>02:14:20</time> Se pierde la red celular. Se enciende la alerta en cabina.</li>
-        <li><time>02:16:41</time> Parada no programada. Nervik sigue registrando sin conexión.</li>
+      <ol class="chips" aria-label="Lo que registra Nervik durante un ataque">
+        <li><time>02:14:07</time><span>La señal cae en 8 satélites a la vez</span></li>
+        <li><time>02:14:20</time><span>Red celular perdida, alerta en cabina</span></li>
+        <li><time>02:31:55</time><span>Expediente firmado enviado a tu central</span></li>
       </ol>
-      <p class="senal-nota">Un túnel apaga los satélites de golpe; un inhibidor los va hundiendo juntos. Esa diferencia es la que reconoce Nervik.</p>
-    </figure>
+      <p class="pista-giro" aria-hidden="true">Arrastra para girar</p>
+    </div>
+  </div>
+
+  <div class="marco">
+    <ul class="hechos" aria-label="En pocas palabras">
+      <li><b>Menos de 5 s</b><span>para detectar el ataque</span></li>
+      <li><b>Sin GPS ni red</b><span>sigue registrando dentro de la unidad</span></li>
+      <li><b>Evidencia firmada</b><span>que tu aseguradora puede verificar</span></li>
+      <li><b>No toca el motor</b><span>solo escucha, sin riesgo para el operador</span></li>
+    </ul>
   </div>
   <div class="carril" aria-hidden="true"></div>
 </section>
 
-<section id="que-es" class="seccion">
+<!-- ================= POR QUÉ ================= -->
+<section id="por-que" class="seccion">
   <div class="marco">
-    <h2>Qué es Nervik</h2>
-    <div class="dos">
-      <div class="texto">
-        <p class="entrada-oscura">Nervik es un sistema de seguridad para flotas de 20 a 200 tractocamiones que circulan por corredores de riesgo, como México–Puebla–Veracruz y el Bajío.</p>
-        <p>El robo de carga casi siempre empieza igual: un inhibidor de señal deja ciegos al GPS y a la central. Durante esos minutos nadie sabe qué está pasando, y después tampoco hay cómo demostrarlo ante la aseguradora.</p>
-        <p>Nervik cubre justo ese hueco. No depende de la señal que el jammer apaga: detecta el ataque dentro de la unidad, sigue registrando sin conexión y entrega un expediente firmado que nadie puede alterar después.</p>
-        <p class="aviso-no"><b>Lo que no hace:</b> no apaga el motor ni manda órdenes al camión. Solo escucha, para no poner en riesgo al operador.</p>
-      </div>
-      <div class="cifras">
-        <p><strong>+7,000 millones</strong> de pesos se pierden por robo al autotransporte de carga, según AMESIS.</p>
-        <p><strong>4,103 tractocamiones</strong> asegurados fueron robados entre octubre de 2024 y septiembre de 2025, según AMIS.</p>
-        <p><strong>8 de cada 10</strong> robos al transporte de carga son con violencia, según AMESIS.</p>
-        <p class="fuente">Fuentes: AMESIS citada por Forbes México (2025–2026); AMIS citada por El Economista.</p>
-      </div>
+    <div class="encabezado-seccion">
+      <h2>El robo empieza cuando tu central se queda ciega</h2>
+      <p>Un inhibidor de señal apaga el GPS y la red de la unidad. Durante esos minutos nadie sabe qué está pasando, y después no hay cómo demostrarlo ante la aseguradora.</p>
+    </div>
+
+    <div class="cifras">
+      <p><strong>$7,000 M</strong><span>de pesos, o más, se pierden por robo al autotransporte de carga, según AMESIS</span></p>
+      <p><strong>4,103</strong><span>tractocamiones asegurados robados entre octubre de 2024 y septiembre de 2025, según AMIS</span></p>
+      <p><strong>8 de cada 10</strong><span>robos al transporte de carga son con violencia, según AMESIS</span></p>
+    </div>
+    <p class="fuente">Fuentes: AMESIS citada por Forbes México (2025–2026); AMIS citada por El Economista.</p>
+
+    <div class="comparacion">
+      <article class="lado lado-sin">
+        <h3>Hoy, durante un ataque</h3>
+        <ol>
+          <li><time>02:14</time>El GPS deja de reportar. La central ve el último punto y nada más.</li>
+          <li><time>02:16</time>La unidad se detiene. Nadie se entera.</li>
+          <li><time>02:45</time>El operador logra llamar. Ya no hay a quién perseguir.</li>
+          <li><time>Después</time>La aseguradora pide pruebas y solo hay un hueco en el mapa.</li>
+        </ol>
+      </article>
+      <article class="lado lado-con">
+        <h3>Con Nervik</h3>
+        <ol>
+          <li><time>02:14:07</time>Nervik reconoce la huella del inhibidor y avisa a la central antes de perder la red.</li>
+          <li><time>02:14:20</time>Se enciende la alerta en cabina. La central ve la unidad marcada como posible ataque.</li>
+          <li><time>02:16:41</time>Registra la parada no programada con la última posición válida.</li>
+          <li><time>02:31:55</time>Regresa la señal y llega el expediente firmado, listo para la aseguradora.</li>
+        </ol>
+      </article>
     </div>
   </div>
 </section>
 
+<!-- ================= CÓMO FUNCIONA ================= -->
 <section id="como-funciona" class="seccion seccion-gris">
   <div class="marco">
-    <h2>Cómo funciona</h2>
-    <div class="dos dos-equipo">
-      <ol class="pasos">
-        <li>
-          <h3>Se instala en 10 minutos</h3>
-          <p>Se conecta al conector verde de 9 pines del tractocamión y se fija con dos cinchos bajo el tablero. Sin perforar ni cortar cables. La app hace una prueba automática de 30 segundos.</p>
-        </li>
-        <li>
-          <h3>Detecta el ataque dentro de la unidad</h3>
-          <p>Su inteligencia artificial vigila la calidad de señal de cada satélite, la red celular y el movimiento del camión. Cuando reconoce la huella de un inhibidor, avisa en cabina y a tu central antes de quedarse incomunicado.</p>
-        </li>
-        <li>
-          <h3>Guarda la evidencia y la entrega</h3>
-          <p>Mientras dura el bloqueo sigue anotando la última posición válida, la velocidad y las paradas. Al regresar la señal envía el expediente firmado a tu central.</p>
-        </li>
-      </ol>
-      <figure class="equipo">
-        <svg viewBox="40 78 425 222" role="img" aria-labelledby="equipo-titulo">
-          <title id="equipo-titulo">El dispositivo Nervik: una cuña de 9 por 6 centímetros con tres luces al frente</title>
-          <path d="M60 210 L330 210 L330 150 L60 185 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M60 185 L130 140 L400 105 L330 150 Z" fill="#ECECE8" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
-          <path d="M330 210 L400 165 L400 105 L330 150 Z" fill="#fff" stroke="#000" stroke-width="4" stroke-linejoin="round"/>
-          <circle cx="120" cy="196" r="7" fill="#000"/><circle cx="150" cy="193" r="7" fill="#000"/><circle cx="180" cy="190" r="7" fill="#fff" stroke="#000" stroke-width="3"/>
-          <path d="M400 140 C 430 140, 435 190, 420 230" fill="none" stroke="#000" stroke-width="5"/>
-          <circle cx="418" cy="248" r="20" fill="#fff" stroke="#000" stroke-width="4"/><circle cx="418" cy="248" r="3" fill="#000"/><circle cx="410" cy="242" r="3" fill="#000"/><circle cx="426" cy="242" r="3" fill="#000"/><circle cx="410" cy="254" r="3" fill="#000"/><circle cx="426" cy="254" r="3" fill="#000"/>
-          <path d="M120 130 L120 225 M270 115 L270 225" stroke="#000" stroke-width="3" stroke-dasharray="7 6"/>
-          <path d="M120 203 L120 255 M150 200 L150 272 M180 197 L180 255" stroke="#000" stroke-width="1.5"/>
-          <text x="112" y="270" font-size="15" text-anchor="end">energía</text><text x="150" y="290" font-size="15" text-anchor="middle">comunicación</text><text x="188" y="270" font-size="15">alerta</text>
-          <text x="455" y="290" font-size="15" text-anchor="end">conector de 9 pines</text>
-          <text x="195" y="100" font-size="15" text-anchor="middle">dos cinchos</text>
-        </svg>
-        <figcaption>Tres luces fijas significan que la unidad está protegida. Una luz, un significado: energía, comunicación y alerta.</figcaption>
-      </figure>
+    <div class="encabezado-seccion">
+      <h2>Se instala en 10 minutos y trabaja solo</h2>
+      <p>Sin perforar ni cortar cables. Funciona aunque la unidad pase horas sin cobertura.</p>
     </div>
-  </div>
-</section>
+    <ol class="pasos">
+      <li>
+        <h3>Conecta y fija</h3>
+        <p>Al conector verde de 9 pines del tractocamión, con dos cinchos bajo el tablero. La app hace una prueba automática de 30 segundos.</p>
+      </li>
+      <li>
+        <h3>Vigila la señal</h3>
+        <p>Su inteligencia artificial revisa la calidad de cada satélite, la red celular y el movimiento del camión, segundo a segundo.</p>
+      </li>
+      <li>
+        <h3>Avisa y registra</h3>
+        <p>Si reconoce un inhibidor, avisa en cabina y a tu central, y guarda la evidencia aunque se quede sin conexión.</p>
+      </li>
+      <li>
+        <h3>Entrega el expediente</h3>
+        <p>Al regresar la señal envía un expediente firmado que nadie puede alterar después.</p>
+      </li>
+    </ol>
 
-<section id="app" class="seccion">
-  <div class="marco">
-    <h2>La app de monitoreo</h2>
-    <div class="dos dos-app">
-      <div class="texto">
-        <p class="entrada-oscura">Tu central ve en tiempo real a todas las unidades en carretera y recibe la alerta en el momento en que una empieza a ser atacada.</p>
-        <ul class="lista-app">
-          <li><b>Monitoreo en vivo.</b> Mapa de la flota, zonas de riesgo por tramo y aviso con sonido cuando una unidad deja de reportar con el motor encendido.</li>
-          <li><b>Expedientes firmados.</b> Línea de tiempo de cada ataque, que tu aseguradora puede verificar y descargar.</li>
-          <li><b>Pruebas a distancia.</b> Diagnóstico de cada equipo desde la app: satélites, red, energía, memoria y luces.</li>
-          <li><b>En computadora y celular.</b> Se instala desde el navegador, sin tiendas de aplicaciones.</li>
-        </ul>
-        <a class="boton" href="app/">Entrar a la app</a>
+    <div class="deteccion">
+      <div class="deteccion-texto">
+        <h3>Así distingue un ataque de un túnel</h3>
+        <p>En un túnel los satélites desaparecen de golpe y regresan al salir. Un inhibidor los va hundiendo a todos al mismo tiempo mientras la unidad sigue en marcha. Esa diferencia es la que Nervik reconoce.</p>
+        <p class="luces-texto"><b>Una luz, un significado.</b> Las tres luces fijas del equipo dicen que la unidad está protegida: energía, comunicación y alerta.</p>
       </div>
-      <figure class="captura">
-        <img src="img/app-monitor.png" alt="Pantalla de monitoreo de la app Nervik con una unidad marcada como posible ataque y la lista de la flota" width="1280" height="860">
+      <figure class="senal" id="senal" aria-labelledby="senal-titulo">
+        <figcaption id="senal-titulo">Calidad de señal de cada satélite durante un ataque</figcaption>
+        <div class="barras" aria-hidden="true">
+          <div class="barra" style="--alto:.86"><i></i><span>G05</span></div>
+          <div class="barra" style="--alto:.92"><i></i><span>G12</span></div>
+          <div class="barra" style="--alto:.78"><i></i><span>G19</span></div>
+          <div class="barra" style="--alto:.88"><i></i><span>G24</span></div>
+          <div class="barra" style="--alto:.81"><i></i><span>R07</span></div>
+          <div class="barra" style="--alto:.9"><i></i><span>E11</span></div>
+          <div class="barra" style="--alto:.84"><i></i><span>B23</span></div>
+          <div class="barra" style="--alto:.76"><i></i><span>G29</span></div>
+        </div>
+        <ol class="registro">
+          <li><time>02:14:07</time> La señal cae en todos los satélites a la vez, a 82 km/h en tramo abierto.</li>
+          <li><time>02:14:20</time> Se pierde la red celular. Se enciende la alerta en cabina.</li>
+          <li><time>02:16:41</time> Parada no programada. Nervik sigue registrando sin conexión.</li>
+        </ol>
       </figure>
     </div>
   </div>
 </section>
 
+<!-- ================= LA APP ================= -->
+<section id="app" class="seccion seccion-app">
+  <div class="marco">
+    <div class="encabezado-seccion">
+      <h2>Toda tu flota, en vivo, en una sola pantalla</h2>
+      <p>La app de monitoreo responde una pregunta: ¿alguna unidad está siendo atacada ahora? En computadora y en celular, sin descargar nada de una tienda.</p>
+    </div>
+    <div class="vitrina">
+      <figure class="laptop">
+        <div class="laptop-pantalla"><img src="img/app-monitor.png" alt="Monitor de la app con una unidad marcada como posible ataque, el mapa de la flota y la lista de unidades" width="1280" height="860" loading="lazy"></div>
+        <div class="laptop-base" aria-hidden="true"></div>
+      </figure>
+      <figure class="celular">
+        <img src="img/app-movil.png" alt="La app en un celular mostrando la alerta de una unidad sin señal" width="780" height="1688" loading="lazy">
+      </figure>
+    </div>
+    <ul class="funciones">
+      <li><h3>Monitoreo en vivo</h3><p>Mapa de la flota, zonas de riesgo por tramo y aviso con sonido cuando una unidad deja de reportar con el motor encendido.</p></li>
+      <li><h3>Expedientes firmados</h3><p>La línea de tiempo de cada ataque, que tu aseguradora puede verificar y descargar.</p></li>
+      <li><h3>Pruebas a distancia</h3><p>Diagnóstico de cada equipo desde la app: satélites, red, energía, memoria y luces.</p></li>
+    </ul>
+    <p class="centrado"><a class="boton" href="app/">Probar la app ahora</a></p>
+  </div>
+</section>
+
+<!-- ================= PLANES ================= -->
 <section id="planes" class="seccion seccion-gris">
   <div class="marco">
-    <h2>Planes y precios</h2>
-    <p class="intro-planes">Pagas una vez el dispositivo y cada mes el plan de cada unidad. El expediente firmado, la app y la conectividad vienen dentro del plan.</p>
+    <div class="encabezado-seccion">
+      <h2>Un precio claro por unidad</h2>
+      <p>Pagas una vez el dispositivo y cada mes el plan de cada unidad. La app, la conectividad y los expedientes firmados vienen dentro del plan.</p>
+    </div>
     <div class="planes">
       <article class="plan">
         <h3>Dispositivo Nervik</h3>
@@ -189,29 +234,42 @@
           <dt>Después, cada mes</dt><dd id="c-mes">—</dd>
         </dl>
         <p class="nota-iva">Incluye IVA. Hoy se cobran los dispositivos y el primer mes del plan.</p>
-        <button class="boton" type="submit">Agregar al carrito</button>
+        <button class="boton boton-ambar" type="submit">Agregar al carrito</button>
         <p class="agregado" id="agregado" role="status" aria-live="polite"></p>
       </form>
     </div>
   </div>
 </section>
 
+<!-- ================= ASEGURADORAS ================= -->
 <section id="aseguradoras" class="seccion">
-  <div class="marco dos">
-    <div>
+  <div class="marco">
+    <div class="encabezado-seccion">
       <h2>Para aseguradoras y brokers</h2>
-      <p class="entrada-oscura">Hoy el riesgo de una flota se mide con el GPS del propio asegurado, que se queda ciego justo durante el ataque.</p>
+      <p>Hoy el riesgo de una flota se mide con el GPS del propio asegurado, que se queda ciego justo durante el ataque.</p>
     </div>
-    <div class="texto">
-      <p><b>Evidencia que se puede comprobar.</b> Cada expediente va firmado por el equipo y encadenado al anterior. Se verifica con la llave pública del dispositivo, sin confiar en Nervik ni en el transportista.</p>
-      <p><b>Perfil de riesgo por flota.</b> Frecuencia de ataques por tramo y horario, para ajustar o condicionar pólizas.</p>
-      <p><b>Programa con flotas aseguradas.</b> Instalación en las unidades de mayor riesgo de tus clientes como parte de la colocación.</p>
-      <a class="boton boton-contorno-oscuro" href="#contacto" data-motivo="aseguradora">Hablar con el equipo</a>
+    <ul class="tres">
+      <li><h3>Evidencia comprobable</h3><p>Cada expediente va firmado por el equipo y encadenado al anterior. Se verifica con su llave pública, sin confiar en Nervik ni en el transportista.</p></li>
+      <li><h3>Riesgo por flota</h3><p>Frecuencia de ataques por tramo y horario, para ajustar o condicionar pólizas con datos.</p></li>
+      <li><h3>Programa con asegurados</h3><p>Instalación en las unidades de mayor riesgo de tus clientes como parte de la colocación.</p></li>
+    </ul>
+    <p><a class="boton boton-contorno-oscuro" href="#contacto" data-motivo="aseguradora">Hablar con el equipo</a></p>
+  </div>
+</section>
+
+<!-- ================= LLAMADO ================= -->
+<section class="llamado">
+  <div class="marco llamado-fila">
+    <h2>Protege tu primera unidad este mes</h2>
+    <div class="botones">
+      <a class="boton boton-ambar" href="#planes">Calcular mi flota</a>
+      <a class="boton boton-contorno" href="#contacto">Hablar con el equipo</a>
     </div>
   </div>
 </section>
 
-<section id="preguntas" class="seccion seccion-gris">
+<!-- ================= PREGUNTAS ================= -->
+<section id="preguntas" class="seccion">
   <div class="marco angosto">
     <h2>Preguntas frecuentes</h2>
     <details><summary>¿Reemplaza a mi GPS actual?</summary><p>No, se suma a él. Tu GPS sigue rastreando; Nervik cubre el momento en que el GPS deja de funcionar por el inhibidor y deja constancia de lo que pasó.</p></details>
@@ -224,11 +282,10 @@
   </div>
 </section>
 
-<section id="proyecto" class="seccion">
+<!-- ================= PROYECTO ================= -->
+<section id="proyecto" class="seccion seccion-gris">
   <div class="marco dos">
-    <div>
-      <h2>Hecho en Puebla</h2>
-    </div>
+    <h2>Hecho en Puebla</h2>
     <div class="texto">
       <p>Nervik nace en el curso Proyecto de Ingeniería IV de la IBERO Puebla, de un equipo de tres estudiantes de ingeniería: Andrik, Juan Pablo y Mauro. Empezó cuando a un familiar de uno de nosotros le robaron la carga mientras manejaba.</p>
       <p>Documentamos cada semana del desarrollo: la búsqueda de la oportunidad, las entrevistas, el diseño del equipo, los costos y los prototipos.</p>
@@ -237,6 +294,7 @@
   </div>
 </section>
 
+<!-- ================= CONTACTO ================= -->
 <section id="contacto" class="seccion seccion-negra">
   <div class="marco dos">
     <div>
@@ -265,7 +323,7 @@
       <textarea id="c-mensaje" name="mensaje" rows="4" placeholder="Cuántas unidades tienes, qué corredores recorres…"></textarea>
       <div class="trampa" aria-hidden="true"><label for="c-web">No llenar</label><input id="c-web" name="sitio_web" tabindex="-1" autocomplete="off"></div>
       <p class="error-form" id="c-error" role="alert" hidden></p>
-      <button class="boton boton-claro" type="submit" id="c-enviar">Enviar mensaje</button>
+      <button class="boton boton-ambar" type="submit" id="c-enviar">Enviar mensaje</button>
       <p class="enviado" id="c-ok" role="status" hidden></p>
     </form>
   </div>
@@ -292,5 +350,6 @@
 <script src="contacto.js"></script>
 <script src="comun.js"></script>
 <script src="sitio.js"></script>
+<script type="module" src="js/portada.js"></script>
 </body>
 </html>

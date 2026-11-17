@@ -15,11 +15,14 @@
     "tunel": "npx --yes cloudflared tunnel --url http://localhost:3000",
     "simular": "npm start -w simulador",
     "test": "npm test -w api",
-    "build": "npm run build -w app",
-    "reiniciar-datos": "node -e \"require('fs').rmSync('api/datos',{recursive:true,force:true});require('fs').rmSync('simulador/.estado-simulador.json',{force:true});console.log('Datos de desarrollo borrados')\""
+    "build": "npm run build -w app && npm run build:3d",
+    "reiniciar-datos": "node -e \"require('fs').rmSync('api/datos',{recursive:true,force:true});require('fs').rmSync('simulador/.estado-simulador.json',{force:true});console.log('Datos de desarrollo borrados')\"",
+    "build:3d": "esbuild web/fuente3d/dispositivo3d.js --bundle --minify --format=esm --target=es2020 --legal-comments=eof --outfile=web/js/dispositivo3d.js"
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "esbuild": "^0.28.2",
+    "three": "^0.187.0"
   },
   "engines": {
     "node": ">=22.13"

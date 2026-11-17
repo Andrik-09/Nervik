@@ -3,7 +3,7 @@
   const N = window.Nervik;
   const $ = id => document.getElementById(id);
 
-  // ---- Portada: la huella del inhibidor (un solo momento animado) ----
+  // ---- Cómo detecta: la huella del inhibidor en la señal de los satélites ----
   const senal = $('senal');
   const pasos = senal.querySelectorAll('.registro li');
   const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -11,6 +11,7 @@
     senal.classList.add('atacada');
     pasos.forEach((li, i) => setTimeout(() => li.classList.add('visible'), sinMovimiento ? 0 : 1300 + i * 1100));
   }
+  // La gráfica de satélites está más abajo: se anima cuando el visitante llega a ella
   if (sinMovimiento) atacar();
   else if ('IntersectionObserver' in window) {
     const obs = new IntersectionObserver(e => { if (e[0].isIntersecting) { setTimeout(atacar, 900); obs.disconnect(); } }, { threshold: 0.5 });
