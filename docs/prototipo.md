@@ -39,7 +39,7 @@ El prototipo firma cada mensaje con su propia llave y la app lo muestra como una
    - `API_URL`: la dirección de la computadora que corre la API, por ejemplo `http://192.168.1.20:3000` (en Windows se ve con `ipconfig`, en Mac con `ipconfig getifaddr en0`). Si ya la desplegaron en Render, la URL `https://…onrender.com`.
    - `WIFI_SSID` y `WIFI_PASS`: la red del laboratorio o el hotspot del celular. La computadora y la Pico deben estar en la misma red si usan la IP local.
    - `GNSS_BAUD`: 9600 para L76K/NEO-6M, 115200 para LC76G.
-4. Conecten la Pico manteniendo presionado **BOOTSEL** la primera vez y den **Upload** (flecha) en la barra de PlatformIO, con el entorno `pico_w_wifi`.
+4. Conecten la Pico manteniendo presionado **BOOTSEL** la primera vez y den **Upload** (flecha) en la barra de PlatformIO, con el entorno `pico_w_wifi` (Wi-Fi) o `pico_w_sim7080g` (la misma Pico W con el módem SIM7080G).
 5. Abran el **Serial Monitor** (enchufe) a 115200. Al arrancar se imprimen el **código QR**, el **código de alta** `NVK1:NVK-P001:…` y la llave pública.
 
 Comandos del monitor serie: `alta` (vuelve a mostrar el QR), `estado`, `diagnostico`, `simulacro`, `vaciar-cola`, `nueva-llave SI`.
