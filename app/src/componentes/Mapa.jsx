@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { enAlerta } from '../formato.js';
+import mapaBase from '../mapaBase.json';
 
 const CENTRO_MX = [19.3, -98.4];
 
@@ -25,6 +26,18 @@ export default function Mapa({ unidades = [], zonas = [], trazo, marca, alto = 4
 
   useEffect(() => {
     const m = L.map(div.current, { zoomControl: true, attributionControl: true }).setView(CENTRO_MX, 7);
+    // Capa base propia (costa, corredores y ciudades): se ve aunque no carguen los mosaicos de OpenStreetMap
+    m.createPane('base');
+    m.getPane('base').style.zIndex = 150;
+    L.geoJSON(mapaBase, {
+      pane: 'base',
+      interactive: false,
+      style: f => (f.properties.tipo === 'tierra'
+        ? { color: '#9a9a96', weight: 1, fillColor: '#f4f4f1', fillOpacity: 1 }
+        : { color: '#7a7a76', weight: 3, dashArray: '8 6' }),
+      pointToLayer: (f, ll) => L.circleMarker(ll, { pane: 'base', radius: 3.5, color: '#555', weight: 1.5, fillColor: '#fff', fillOpacity: 1 })
+        .bindTooltip(f.properties.nombre, { permanent: true, direction: 'right', className: 'ciudad-base', offset: [6, 0] }),
+    }).addTo(m);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18, attribution: '© OpenStreetMap',
     }).addTo(m);
