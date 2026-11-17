@@ -33,9 +33,9 @@ export default function Mapa({ unidades = [], zonas = [], trazo, marca, alto = 4
       pane: 'base',
       interactive: false,
       style: f => (f.properties.tipo === 'tierra'
-        ? { color: '#9a9a96', weight: 1, fillColor: '#f4f4f1', fillOpacity: 1 }
-        : { color: '#7a7a76', weight: 3, dashArray: '8 6' }),
-      pointToLayer: (f, ll) => L.circleMarker(ll, { pane: 'base', radius: 3.5, color: '#555', weight: 1.5, fillColor: '#fff', fillOpacity: 1 })
+        ? { color: '#2e2e2e', weight: 1, fillColor: '#141414', fillOpacity: 1 }
+        : { color: 'rgba(255,178,26,.55)', weight: 3, dashArray: '8 6' }),
+      pointToLayer: (f, ll) => L.circleMarker(ll, { pane: 'base', radius: 3.5, color: '#000', weight: 1.5, fillColor: '#fff', fillOpacity: 1 })
         .bindTooltip(f.properties.nombre, { permanent: true, direction: 'right', className: 'ciudad-base', offset: [6, 0] }),
     }).addTo(m);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -50,16 +50,16 @@ export default function Mapa({ unidades = [], zonas = [], trazo, marca, alto = 4
     const g = capas.current.zonas; g.clearLayers();
     // radio en píxeles para que la zona se vea a cualquier nivel de zoom
     zonas.forEach(z => L.circleMarker([z.lat, z.lon], {
-      radius: 8 + 18 * z.relativo, color: '#000', weight: 1,
-      fillColor: '#000', fillOpacity: 0.06 + 0.24 * z.relativo,
+      radius: 8 + 18 * z.relativo, color: '#FFB21A', weight: 1,
+      fillColor: '#FFB21A', fillOpacity: 0.06 + 0.24 * z.relativo,
     }).bindTooltip(`${z.eventos} evento(s) · riesgo relativo ${Math.round(z.relativo * 100)}%`).addTo(g));
   }, [zonas]);
 
   useEffect(() => {
     const g = capas.current.trazo; g.clearLayers();
-    if (trazo?.length > 1) L.polyline(trazo, { color: '#000', weight: 3 }).addTo(g);
+    if (trazo?.length > 1) L.polyline(trazo, { color: '#FFB21A', weight: 3 }).addTo(g);
     if (marca?.lat != null) {
-      L.circleMarker([marca.lat, marca.lon], { radius: 9, color: '#000', weight: 3, fillColor: '#fff', fillOpacity: 1 })
+      L.circleMarker([marca.lat, marca.lon], { radius: 9, color: '#FFB21A', weight: 3, fillColor: '#000', fillOpacity: 1 })
         .bindTooltip(marca.texto || '', { permanent: !!marca.texto, direction: 'top' }).addTo(g);
     }
   }, [trazo, marca]);

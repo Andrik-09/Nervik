@@ -3,26 +3,15 @@
   const N = window.Nervik;
   const $ = id => document.getElementById(id);
 
-  // ---- Cómo detecta: la huella del inhibidor en la señal de los satélites ----
-  const senal = $('senal');
-  const pasos = senal.querySelectorAll('.registro li');
-  const sinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function atacar() {
-    senal.classList.add('atacada');
-    pasos.forEach((li, i) => setTimeout(() => li.classList.add('visible'), sinMovimiento ? 0 : 1300 + i * 1100));
-  }
-  // La gráfica de satélites está más abajo: se anima cuando el visitante llega a ella
-  if (sinMovimiento) atacar();
-  else if ('IntersectionObserver' in window) {
-    const obs = new IntersectionObserver(e => { if (e[0].isIntersecting) { setTimeout(atacar, 900); obs.disconnect(); } }, { threshold: 0.5 });
-    obs.observe(senal);
-  } else atacar();
-
   // ---- Cotizador y carrito ----
   const campo = $('unidades');
   function unidades() { return Math.max(1, Math.min(500, Math.floor(Number(campo.value) || 1))); }
   function recalcular() {
-    const c = N.cotizar(unidades());
+    const n = unidades();
+    const salida = $('u-salida');
+    if (salida) salida.textContent = n;
+    campo.style.setProperty('--avance', `${((n - Number(campo.min || 1)) / ((Number(campo.max) || 200) - (Number(campo.min) || 1))) * 100}%`);
+    const c = N.cotizar(n);
     $('c-hoy').textContent = N.pesos(c.total);
     $('c-mes').textContent = N.pesos(c.mensual);
   }
@@ -31,7 +20,6 @@
     recalcular();
   }));
   campo.addEventListener('input', recalcular);
-  campo.addEventListener('blur', () => { campo.value = unidades(); recalcular(); });
   $('cotizador').addEventListener('submit', ev => {
     ev.preventDefault();
     const n = unidades();

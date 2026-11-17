@@ -118,12 +118,12 @@ export default function Instalar() {
         <section className="formulario">
           <div className="ilustracion" aria-hidden="true">
             <svg viewBox="0 0 320 120" width="100%" height="120">
-              <circle cx="70" cy="60" r="38" fill="none" stroke="#000" strokeWidth="4" />
-              {[[70, 38], [52, 50], [88, 50], [52, 70], [88, 70], [70, 82], [70, 60], [60, 60], [80, 60]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="4" fill="#000" />)}
+              <circle cx="70" cy="60" r="38" fill="none" stroke="currentColor" strokeWidth="4" />
+              {[[70, 38], [52, 50], [88, 50], [52, 70], [88, 70], [70, 82], [70, 60], [60, 60], [80, 60]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r="4" fill="currentColor" />)}
               <text x="70" y="115" textAnchor="middle" fontSize="12">conector verde 9 pines</text>
-              <path d="M150 85 L290 85 L290 45 L150 75 Z" fill="none" stroke="#000" strokeWidth="4" />
-              <line x1="185" y1="40" x2="185" y2="100" stroke="#000" strokeWidth="3" strokeDasharray="5 4" />
-              <line x1="255" y1="35" x2="255" y2="100" stroke="#000" strokeWidth="3" strokeDasharray="5 4" />
+              <path d="M150 85 L290 85 L290 45 L150 75 Z" fill="none" stroke="currentColor" strokeWidth="4" />
+              <line x1="185" y1="40" x2="185" y2="100" stroke="currentColor" strokeWidth="3" strokeDasharray="5 4" />
+              <line x1="255" y1="35" x2="255" y2="100" stroke="currentColor" strokeWidth="3" strokeDasharray="5 4" />
               <text x="220" y="115" textAnchor="middle" fontSize="12">cuña + 2 cinchos</text>
             </svg>
           </div>

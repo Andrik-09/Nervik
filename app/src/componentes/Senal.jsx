@@ -13,7 +13,7 @@ export default function Senal({ datos, campo, titulo, unidad, min, max, umbral, 
       <figcaption><span>{titulo}</span><b>{ultimo} {unidad}</b></figcaption>
       <svg viewBox={`0 0 ${ancho} ${alto}`} preserveAspectRatio="none" role="img" aria-label={`${titulo}, último valor ${ultimo} ${unidad}`}>
         {umbral != null && <line x1="0" x2={ancho} y1={y(umbral)} y2={y(umbral)} className="umbral" />}
-        <polyline points={puntos} fill="none" stroke="#000" strokeWidth="2" vectorEffect="non-scaling-stroke" />
+        <polyline points={puntos} fill="none" stroke="currentColor" strokeWidth="2" vectorEffect="non-scaling-stroke" />
       </svg>
       {umbral != null && <div className="pie-senal">Línea punteada: umbral de anomalía ({umbral} {unidad})</div>}
     </figure>
